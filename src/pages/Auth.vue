@@ -93,7 +93,6 @@
 import { ref, inject } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { signIn, signUp } from '@/services/authService'
-import { supabase } from '@/services/supabaseClient'
 import { upsertProfile } from '@/services/profileService'
 
 const router = useRouter()

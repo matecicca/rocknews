@@ -12,7 +12,12 @@
       </div>
 
       <template v-else>
-        <PostCard v-for="p in posts" :key="p.id" :post="p" />
+        <PostCard
+          v-for="p in posts"
+          :key="p.id"
+          :post="p"
+          @deleted="handleDeleted"
+        />
       </template>
     </div>
 
@@ -41,6 +46,14 @@ import PostComposer from '@/components/PostComposer.vue'
 import { useFeed } from '@/composables/useFeed'
 
 const { posts, loading, fetchFirstPage, prepend } = useFeed()
+
+function handleDeleted(postId) {
+  const index = posts.value.findIndex(p => p.id === postId)
+  if (index !== -1) {
+    posts.value.splice(index, 1)
+  }
+}
+
 onMounted(fetchFirstPage)
 </script>
 

@@ -29,7 +29,9 @@
   
         <!-- Input -->
         <form @submit.prevent="handleSend" class="border-t border-gray-700 p-4 flex gap-3">
+          <label for="chat-message" class="sr-only">Mensaje de chat</label>
           <input
+            id="chat-message"
             v-model="newMessage"
             type="text"
             placeholder="Escribí tu mensaje..."

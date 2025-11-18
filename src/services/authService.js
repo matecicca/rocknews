@@ -53,3 +53,12 @@ export function onAuthStateChange(callback) {
   )
   return () => data.subscription.unsubscribe()
 }
+
+/**
+ * Actualiza la contraseña del usuario actual.
+ * @param {string} newPassword - Nueva contraseña.
+ * @returns {Promise<object>} Resultado de la actualización.
+ */
+export async function updatePassword(newPassword) {
+  return await supabase.auth.updateUser({ password: newPassword })
+}

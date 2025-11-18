@@ -6,4 +6,4 @@ Turno: mañana
 Comisión: DWM4AP
 Apellido y nombre: Ciccarello Mateo
 Docente: Santiago Gallino
-Carácter de entrega: Primer Parcial
+Carácter de entrega: Segundo Parcial

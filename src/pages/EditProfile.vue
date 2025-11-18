@@ -16,6 +16,31 @@
       <h2 class="text-xl font-semibold text-white">Editar perfil</h2>
 
       <div class="flex flex-col gap-4">
+        <!-- Avatar -->
+        <div>
+          <label for="avatar" class="block text-sm text-gray-400 mb-2">Foto de perfil</label>
+          <div class="flex items-center gap-4">
+            <div class="w-20 h-20 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
+              <img
+                v-if="avatarPreview"
+                :src="avatarPreview"
+                alt="Avatar preview"
+                class="w-full h-full object-cover"
+              />
+              <span v-else class="text-gray-400 text-2xl">
+                {{ username.charAt(0).toUpperCase() }}
+              </span>
+            </div>
+            <input
+              id="avatar"
+              type="file"
+              accept="image/*"
+              @change="handleAvatarChange"
+              class="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-gray-700 file:bg-gray-900 file:text-white hover:file:bg-gray-700"
+            />
+          </div>
+        </div>
+
         <div>
           <label for="username" class="block text-sm text-gray-400">Usuario</label>
           <input
@@ -72,21 +97,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { ref, onMounted, inject, computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { getProfile, upsertProfile } from '@/services/profileService'
-import { supabase } from '@/services/supabaseClient'
+import { getProfile, upsertProfile, uploadAvatar, getAvatarUrl } from '@/services/profileService'
+import { updatePassword } from '@/services/authService'
 
-const router = useRouter()
 const { getSession } = useAuth()
 const showToast = inject('showToast', () => {})
 
 const username = ref('')
 const full_name = ref('')
 const bio = ref('')
+const avatar_path = ref('')
 const newPassword = ref('')
 const loadingProfile = ref(false)
+const avatarFile = ref(null)
+
+const avatarPreview = computed(() => {
+  if (avatarFile.value) {
+    return URL.createObjectURL(avatarFile.value)
+  }
+  return getAvatarUrl(avatar_path.value)
+})
 
 async function loadProfile() {
   const s = await getSession()
@@ -97,6 +130,14 @@ async function loadProfile() {
     username.value = profile.username || ''
     full_name.value = profile.full_name || ''
     bio.value = profile.bio || ''
+    avatar_path.value = profile.avatar_path || ''
+  }
+}
+
+function handleAvatarChange(event) {
+  const file = event.target.files?.[0]
+  if (file) {
+    avatarFile.value = file
   }
 }
 
@@ -105,8 +146,28 @@ async function handleSave() {
   try {
     const s = await getSession()
     const userId = s?.user?.id
-    await upsertProfile({ id: userId, username: username.value, full_name: full_name.value, bio: bio.value })
+
+    let newAvatarPath = avatar_path.value
+
+    // Subir avatar si hay uno nuevo
+    if (avatarFile.value) {
+      newAvatarPath = await uploadAvatar(avatarFile.value, userId)
+    }
+
+    await upsertProfile({
+      id: userId,
+      username: username.value,
+      full_name: full_name.value,
+      bio: bio.value,
+      avatar_path: newAvatarPath
+    })
+
+    avatar_path.value = newAvatarPath
+    avatarFile.value = null
     showToast('Perfil actualizado correctamente ✅', 'success')
+  } catch (err) {
+    console.error(err)
+    showToast('Error al actualizar el perfil', 'error')
   } finally {
     loadingProfile.value = false
   }
@@ -117,9 +178,12 @@ async function handlePasswordChange() {
     showToast('La contraseña debe tener al menos 6 caracteres.', 'error')
     return
   }
-  const { error } = await supabase.auth.updateUser({ password: newPassword.value })
+  const { error } = await updatePassword(newPassword.value)
   if (error) showToast('Error al cambiar la contraseña.', 'error')
-  else showToast('Contraseña actualizada con éxito 🔒', 'success')
+  else {
+    showToast('Contraseña actualizada con éxito 🔒', 'success')
+    newPassword.value = ''
+  }
 }
 
 onMounted(loadProfile)
