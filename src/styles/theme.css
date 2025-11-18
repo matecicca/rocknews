@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+/* ===============================
+   Estilos base del proyecto Rocknews (Dark Theme)
+   =============================== */
+
+@layer base {
+  html {
+    @apply font-sans bg-gray-900 text-white;
+  }
+  body {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+/* ===============================
+   Componentes reutilizables
+   =============================== */
+
+@layer components {
+  /* --- Tarjeta --- */
+  .card {
+    @apply bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-700 text-white;
+  }
+
+  /* --- Botones --- */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg border px-4 py-2 font-medium transition
+      focus:outline-none focus:ring-2 focus:ring-gray-600;
+  }
+
+  /* --- Botón primario --- */
+  .btn-primary {
+    @apply bg-black text-white border-black hover:bg-gray-800;
+  }
+
+  /* --- Botón ghost (oscuro) --- */
+  .btn-ghost {
+    @apply border border-gray-700 text-white hover:bg-gray-700;
+  }
+
+  /* --- Botón responsive para texto en una línea --- */
+  .btn-nowrap {
+    @apply whitespace-nowrap leading-tight text-[12px] sm:text-[13px] md:text-sm;
+  }
+
+  /* --- Inputs y textareas --- */
+  .input,
+  .textarea {
+    @apply w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white
+      placeholder-gray-400 focus:ring-2 focus:ring-gray-600 focus:outline-none;
+  }
+
+  .textarea {
+    @apply min-h-[120px];
+  }
+
+  /* --- Tipografía general --- */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-white font-semibold;
+  }
+
+  p {
+    @apply text-gray-300 leading-relaxed;
+  }
+
+  a {
+    @apply text-white no-underline hover:underline transition;
+  }
+
+  /* --- Header y Footer --- */
+  header,
+  footer {
+    @apply bg-black text-white border-none;
+  }
+
+  /* --- Toast --- */
+  .toast {
+    @apply fixed bottom-6 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-white font-medium shadow;
+  }
+
+  .toast-info {
+    @apply bg-gray-700;
+  }
+
+  .toast-success {
+    @apply bg-green-600;
+  }
+
+  .toast-error {
+    @apply bg-red-600;
+  }
+
+  .toast-warning {
+    @apply bg-yellow-600;
+  }
+
+  /* --- Utilidades complementarias --- */
+  .text-center {
+    @apply text-center;
+  }
+
+  .text-gray {
+    @apply text-gray-400;
+  }
+
+  .text-sm {
+    @apply text-sm;
+  }
+
+  .rounded {
+    @apply rounded-md;
+  }
+
+  .shadow {
+    @apply shadow;
+  }
+
+  /* --- Transiciones globales --- */
+  .fade-enter-active,
+  .fade-leave-active {
+    @apply transition-opacity duration-200;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    @apply opacity-0;
+  }
+}
