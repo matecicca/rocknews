@@ -44,14 +44,14 @@
         <button
           v-if="!editing"
           @click="startEdit"
-          class="text-gray-400 hover:text-blue-400 text-sm px-2 py-1"
+          class="text-gray-400 hover:text-blue-400 text-sm px-2 py-1 cursor-pointer"
           title="Editar"
         >
           ✏️
         </button>
         <button
           @click="handleDelete"
-          class="text-gray-400 hover:text-red-400 text-sm px-2 py-1"
+          class="text-gray-400 hover:text-red-400 text-sm px-2 py-1 cursor-pointer"
           title="Eliminar"
         >
           🗑️
@@ -86,9 +86,9 @@
     <div class="mt-4 pt-4 border-t border-gray-700/50 space-y-3">
       <button
         @click="toggleComments"
-        class="text-sm text-gray-400 hover:text-white transition"
+        class="text-sm text-gray-400 hover:text-white transition cursor-pointer"
       >
-        {{ showComments ? '▼' : '▶' }} Comentarios ({{ comments.length }})
+        {{ showComments ? '▼' : '▶' }} Comentarios ({{ commentCount }})
       </button>
 
       <div v-if="showComments" class="space-y-3">
@@ -119,7 +119,7 @@
               <button
                 v-if="isOwnComment(comment)"
                 @click="deleteCommentHandler(comment.id)"
-                class="text-gray-500 hover:text-red-400 text-xs"
+                class="text-gray-500 hover:text-red-400 text-xs cursor-pointer"
                 title="Eliminar comentario"
               >
                 ✕
@@ -152,9 +152,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, inject } from 'vue'
 import { useAuth } from '@/composables/useAuth'
-import { updatePost, deletePost, getPostImageUrl } from '@/services/postService'
+import { updatePost, deletePost, getPostImageUrl, deletePostImage } from '@/services/postService'
 import { getAvatarUrl } from '@/services/profileService'
-import { listComments, createComment, deleteComment, subscribeToComments } from '@/services/commentService'
+import { listComments, createComment, deleteComment, getCommentsCount, subscribeToComments } from '@/services/commentService'
 
 const props = defineProps({
   post: { type: Object, required: true }
@@ -169,6 +169,7 @@ const editing = ref(false)
 const editedContent = ref('')
 const showComments = ref(false)
 const comments = ref([])
+const commentCount = ref(0)
 const newComment = ref('')
 let unsubscribe = null
 
@@ -230,6 +231,11 @@ async function saveEdit() {
 async function handleDelete() {
   if (!confirm('¿Estás seguro de eliminar esta publicación?')) return
   try {
+    // Eliminar imagen del bucket si existe
+    if (props.post.image_path) {
+      await deletePostImage(props.post.image_path)
+    }
+
     await deletePost(props.post.id)
     emit('deleted', props.post.id)
     showToast('Post eliminado', 'success')
@@ -244,20 +250,26 @@ async function toggleComments() {
   showComments.value = !showComments.value
   if (showComments.value && comments.value.length === 0) {
     await loadComments()
-    subscribeToCommentsRealtime()
   }
 }
 
 async function loadComments() {
   comments.value = await listComments(props.post.id)
+  commentCount.value = comments.value.length
+}
+
+async function loadCommentCount() {
+  commentCount.value = await getCommentsCount(props.post.id)
 }
 
 function subscribeToCommentsRealtime() {
   unsubscribe = subscribeToComments(props.post.id, (comment, eventType) => {
     if (eventType === 'INSERT') {
       comments.value.push(comment)
+      commentCount.value++
     } else if (eventType === 'DELETE') {
       comments.value = comments.value.filter(c => c.id !== comment.id)
+      commentCount.value--
     } else if (eventType === 'UPDATE') {
       const index = comments.value.findIndex(c => c.id === comment.id)
       if (index !== -1) comments.value[index] = comment
@@ -285,6 +297,11 @@ async function deleteCommentHandler(commentId) {
     showToast('Error al eliminar comentario', 'error')
   }
 }
+
+onMounted(() => {
+  loadCommentCount()
+  subscribeToCommentsRealtime()
+})
 
 onUnmounted(() => {
   if (unsubscribe) unsubscribe()

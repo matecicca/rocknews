@@ -1,15 +1,29 @@
 <template>
   <form
     @submit.prevent="submit"
-    class="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-sm space-y-4 text-white"
+    class="space-y-4 text-white"
   >
+    <!-- Agregar imagen -->
+    <div>
+      <label for="post-image" class="cursor-pointer text-gray-400 hover:text-white transition">
+        <span class="text-sm">Agregar una imagen</span>
+        <input
+          id="post-image"
+          type="file"
+          accept="image/*"
+          @change="handleImageChange"
+          class="sr-only"
+        />
+      </label>
+    </div>
+
     <!-- Campo de texto -->
     <div>
       <label for="post-content" class="sr-only">Contenido de la publicación</label>
       <textarea
         id="post-content"
         v-model="content"
-        class="textarea bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:ring-gray-600 focus:border-gray-600 min-h-[160px]"
+        class="textarea bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:ring-gray-600 focus:border-gray-600 min-h-[80px]"
         placeholder="Escribe lo que quieras..."
       ></textarea>
     </div>
@@ -28,20 +42,8 @@
 
     <!-- Footer -->
     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <label for="post-image" class="cursor-pointer text-gray-400 hover:text-white transition">
-          <span class="text-xl">📷</span>
-          <input
-            id="post-image"
-            type="file"
-            accept="image/*"
-            @change="handleImageChange"
-            class="sr-only"
-          />
-        </label>
-        <div class="text-xs text-gray-400">
-          Como: <strong class="text-gray-200">{{ displayName }}</strong>
-        </div>
+      <div class="text-xs text-gray-400">
+        Como: <strong class="text-gray-200">{{ displayName }}</strong>
       </div>
 
       <button

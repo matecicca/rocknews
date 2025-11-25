@@ -11,8 +11,21 @@
         @click="goToProfile(u.id)"
         class="user-card cursor-pointer rounded-lg border border-gray-700 bg-gray-800 p-4 transition-transform transform hover:-translate-y-1 hover:shadow-lg"
       >
-        <div class="font-semibold text-white mb-1">
-          {{ u.username || '(sin usuario)' }}
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center flex-shrink-0">
+            <img
+              v-if="getAvatarUrl(u.avatar_path)"
+              :src="getAvatarUrl(u.avatar_path)"
+              :alt="u.username"
+              class="w-full h-full object-cover"
+            />
+            <span v-else class="text-gray-300 font-semibold text-lg">
+              {{ (u.username || 'U').charAt(0).toUpperCase() }}
+            </span>
+          </div>
+          <div class="font-semibold text-white">
+            {{ u.username || '(sin usuario)' }}
+          </div>
         </div>
         <div class="text-sm text-gray-400">{{ u.full_name }}</div>
         <div class="text-xs text-gray-500">{{ u.bio }}</div>
@@ -26,6 +39,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProfiles } from '@/composables/useProfiles'
 import { useAuth } from '@/composables/useAuth'
+import { getAvatarUrl } from '@/services/profileService'
 
 const { profiles, loading, fetchProfiles } = useProfiles()
 const { session } = useAuth()

@@ -1,41 +1,41 @@
 <template>
-  <section
-    class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 max-w-6xl mx-auto px-4 py-10 text-white"
-  >
-    <!-- Publicaciones -->
-    <div class="space-y-4">
-      <div
-        v-if="loading"
-        class="text-center text-gray-400 bg-gray-800 border border-gray-700 p-4 rounded-xl"
-      >
-        Cargando publicaciones...
-      </div>
+  <section class="max-w-7xl mx-auto px-4 py-10 text-white space-y-6">
+    <!-- PostComposer -->
+    <div class="bg-gray-800 rounded-xl shadow-md p-4 border border-gray-700">
+      <h3 class="text-lg font-semibold text-white mb-3">
+        ¿Qué estás pensando?
+      </h3>
 
-      <template v-else>
-        <PostCard
-          v-for="p in posts"
-          :key="p.id"
-          :post="p"
-          @deleted="handleDeleted"
-        />
-      </template>
+      <PostComposer
+        @created="prepend"
+        class="flex flex-col gap-4"
+      />
     </div>
 
-    <!-- PostComposer -->
-    <aside class="space-y-4">
-      <div
-        class="bg-gray-800 rounded-xl shadow-md p-6 sticky top-6 border border-gray-700"
-      >
-        <h3 class="text-xl font-semibold text-white mb-4">
-          ¿Qué estás pensando?
-        </h3>
+    <!-- Publicaciones -->
+    <div
+      v-if="loading"
+      class="text-center text-gray-400 bg-gray-800 border border-gray-700 p-4 rounded-xl max-w-2xl mx-auto"
+    >
+      Cargando publicaciones...
+    </div>
 
-        <PostComposer
-          @created="prepend"
-          class="flex flex-col gap-4"
-        />
-      </div>
-    </aside>
+    <div
+      v-else-if="posts.length === 0"
+      class="text-center text-gray-400 bg-gray-800 border border-gray-700 p-8 rounded-xl max-w-2xl mx-auto"
+    >
+      <p class="text-lg">Aún no hay publicaciones</p>
+      <p class="text-sm mt-2">Sé el primero en compartir algo</p>
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <PostCard
+        v-for="p in posts"
+        :key="p.id"
+        :post="p"
+        @deleted="handleDeleted"
+      />
+    </div>
   </section>
 </template>
 

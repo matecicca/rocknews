@@ -11,9 +11,13 @@
         <!-- LOGO -->
         <RouterLink
           to="/"
-          class="font-bold text-2xl text-white tracking-wide hover:text-gray-300 transition"
+          class="hover:opacity-80 transition"
         >
-          Rocknews
+          <img
+            src="/rocknews-logo.png"
+            alt="Rocknews"
+            class="h-10"
+          />
         </RouterLink>
 
         <!-- NAVEGACIÓN + ACCIONES DE USUARIO -->

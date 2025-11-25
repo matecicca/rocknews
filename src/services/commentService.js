@@ -111,6 +111,25 @@ export async function deleteComment(commentId) {
 }
 
 /**
+ * Obtiene el conteo de comentarios de un post.
+ * @param {string} postId - ID del post.
+ * @returns {Promise<number>} Número de comentarios.
+ */
+export async function getCommentsCount(postId) {
+  const { count, error } = await supabase
+    .from('comments')
+    .select('*', { count: 'exact', head: true })
+    .eq('post_id', postId)
+
+  if (error) {
+    console.error('Error getCommentsCount:', error)
+    return 0
+  }
+
+  return count || 0
+}
+
+/**
  * Escucha cambios en tiempo real en los comentarios de un post.
  * @param {string} postId - ID del post.
  * @param {Function} onChange - Callback ejecutado ante cambios.
