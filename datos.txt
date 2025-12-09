@@ -4,6 +4,6 @@ Cuatrimestre: 4to
 Año: 2025
 Turno: mañana
 Comisión: DWM4AP
-Apellido y nombre: Ciccarello Mateo
+Apellido y nombre: Ciccarello Mateo, Castelino Felix
 Docente: Santiago Gallino
 Carácter de entrega: Segundo Parcial

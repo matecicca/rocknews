@@ -31,6 +31,21 @@
     <!-- COLUMNA DERECHA: perfil -->
     <div class="flex flex-col gap-6">
       <div class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700">
+        <!-- Avatar centrado -->
+        <div v-if="!loading && profile" class="flex justify-center mb-4">
+          <div class="w-24 h-24 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
+            <img
+              v-if="avatarUrl"
+              :src="avatarUrl"
+              :alt="profile.username"
+              class="w-full h-full object-cover"
+            />
+            <span v-else class="text-gray-300 font-semibold text-3xl">
+              {{ (profile.username || 'U').charAt(0).toUpperCase() }}
+            </span>
+          </div>
+        </div>
+
         <h2 class="text-xl font-semibold text-white mb-3">Perfil</h2>
 
         <div v-if="loading" class="text-gray-400 text-sm">Cargando perfil...</div>
@@ -59,10 +74,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { getProfile } from '@/services/profileService'
+import { getProfile, getAvatarUrl } from '@/services/profileService'
 import { listUserPosts } from '@/services/postService'
 import { getOrCreateConversation } from '@/services/privateChatService'
 import PostCard from '@/components/PostCard.vue'
@@ -75,6 +90,8 @@ const profile = ref(null)
 const loading = ref(true)
 const loadingPosts = ref(true)
 const userPosts = ref([])
+
+const avatarUrl = computed(() => getAvatarUrl(profile.value?.avatar_path))
 
 onMounted(async () => {
   const id = route.params.id

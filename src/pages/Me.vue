@@ -29,6 +29,21 @@
     <!-- COLUMNA DERECHA: perfil -->
     <div class="flex flex-col gap-6">
       <div class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700">
+        <!-- Avatar centrado -->
+        <div class="flex justify-center mb-4">
+          <div class="w-24 h-24 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
+            <img
+              v-if="avatarUrl"
+              :src="avatarUrl"
+              :alt="username"
+              class="w-full h-full object-cover"
+            />
+            <span v-else class="text-gray-300 font-semibold text-3xl">
+              {{ (username || 'U').charAt(0).toUpperCase() }}
+            </span>
+          </div>
+        </div>
+
         <h2 class="text-xl font-semibold text-white mb-3">Mi cuenta</h2>
 
         <p class="text-sm text-gray-400 mb-1">
@@ -67,9 +82,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
 import { useAuth } from '@/composables/useAuth'
-import { getProfile } from '@/services/profileService'
+import { getProfile, getAvatarUrl } from '@/services/profileService'
 import { listUserPosts } from '@/services/postService'
 import PostCard from '@/components/PostCard.vue'
 import { useRouter } from 'vue-router'
@@ -81,8 +96,11 @@ const router = useRouter()
 const username = ref('')
 const full_name = ref('')
 const bio = ref('')
+const avatar_path = ref('')
 const loadingPosts = ref(true)
 const userPosts = ref([])
+
+const avatarUrl = computed(() => getAvatarUrl(avatar_path.value))
 
 async function loadProfile() {
   try {
@@ -94,6 +112,7 @@ async function loadProfile() {
       username.value = profile.username || ''
       full_name.value = profile.full_name || ''
       bio.value = profile.bio || ''
+      avatar_path.value = profile.avatar_path || ''
     }
   } catch (error) {
     showToast('No se pudo cargar el perfil.', 'error')

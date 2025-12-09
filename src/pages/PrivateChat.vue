@@ -1,12 +1,12 @@
 <template>
     <section class="max-w-4xl mx-auto px-4 py-6 text-white">
       <div v-if="loading" class="text-gray-400 text-center py-10">Cargando conversación...</div>
-  
+
       <div v-else class="bg-gray-800 rounded-xl shadow border border-gray-700 flex flex-col h-[80vh]">
         <!-- Header -->
-        <div class="bg-gray-900 border-b border-gray-700 px-4 py-3 text-center font-semibold text-lg">
-          Conversación con {{ otherUserName || 'Usuario' }}
-        </div>
+        <header class="bg-gray-900 border-b border-gray-700 px-4 py-3 text-center">
+          <h2 class="font-semibold text-lg m-0">Conversación con {{ otherUserName || 'Usuario' }}</h2>
+        </header>
   
         <!-- Mensajes -->
         <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3">

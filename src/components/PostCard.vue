@@ -26,13 +26,15 @@
 
         <!-- User info -->
         <div class="text-sm">
-          <RouterLink
-            v-if="post.profiles?.id"
-            :to="getProfileLink(post.profiles.id)"
-            class="font-medium text-white hover:text-gray-300 hover:underline"
-          >
-            {{ post.profiles?.username || 'usuario' }}
-          </RouterLink>
+          <h3 class="text-base font-medium text-white m-0">
+            <RouterLink
+              v-if="post.profiles?.id"
+              :to="getProfileLink(post.profiles.id)"
+              class="hover:text-gray-300 hover:underline"
+            >
+              {{ post.profiles?.username || 'usuario' }}
+            </RouterLink>
+          </h3>
           <div class="text-gray-400 text-xs">
             <time :datetime="post.created_at">{{ formattedDate }}</time>
           </div>
@@ -265,11 +267,19 @@ async function loadCommentCount() {
 function subscribeToCommentsRealtime() {
   unsubscribe = subscribeToComments(props.post.id, (comment, eventType) => {
     if (eventType === 'INSERT') {
-      comments.value.push(comment)
-      commentCount.value++
+      // Verificar si el comentario ya existe para evitar duplicados
+      const exists = comments.value.some(c => c.id === comment.id)
+      if (!exists) {
+        comments.value.push(comment)
+        commentCount.value++
+      }
     } else if (eventType === 'DELETE') {
+      // Solo decrementar si el comentario existía
+      const lengthBefore = comments.value.length
       comments.value = comments.value.filter(c => c.id !== comment.id)
-      commentCount.value--
+      if (comments.value.length < lengthBefore) {
+        commentCount.value--
+      }
     } else if (eventType === 'UPDATE') {
       const index = comments.value.findIndex(c => c.id === comment.id)
       if (index !== -1) comments.value[index] = comment
@@ -280,7 +290,12 @@ function subscribeToCommentsRealtime() {
 async function addComment() {
   if (!newComment.value.trim()) return
   try {
-    await createComment({ post_id: props.post.id, content: newComment.value })
+    const comment = await createComment({ post_id: props.post.id, content: newComment.value })
+
+    // Agregar el comentario inmediatamente al array local
+    comments.value.push(comment)
+    commentCount.value++
+
     newComment.value = ''
   } catch (err) {
     console.error(err)
@@ -292,6 +307,10 @@ async function deleteCommentHandler(commentId) {
   if (!confirm('¿Eliminar este comentario?')) return
   try {
     await deleteComment(commentId)
+
+    // Eliminar el comentario inmediatamente del array local
+    comments.value = comments.value.filter(c => c.id !== commentId)
+    commentCount.value--
   } catch (err) {
     console.error(err)
     showToast('Error al eliminar comentario', 'error')
