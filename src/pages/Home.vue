@@ -3,18 +3,15 @@
     class="flex flex-col items-center justify-center text-center min-h-[calc(100vh-160px)] px-4 bg-gradient-to-b from-gray-900 to-gray-800 relative overflow-hidden"
   >
     <div class="max-w-3xl space-y-6 z-10">
-      <!-- Título principal -->
       <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
         Bienvenido a <span class="text-gray-400">Rocknews</span>
       </h1>
 
-      <!-- Subtítulo -->
       <p class="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
         Descubrí, compartí y comentá las últimas novedades del mundo rockero.
         Unite a la comunidad y hacé oír tu voz 🎸
       </p>
 
-      <!-- Botones -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto mt-10">
         <RouterLink
           to="/feed"
@@ -41,7 +38,6 @@
       </div>
     </div>
 
-    <!-- 🔹 Decoración: luces flotantes -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <div
         v-for="i in 6"

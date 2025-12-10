@@ -3,7 +3,6 @@
     class="relative min-h-[100dvh] w-full flex items-center justify-center bg-gray-900 overflow-hidden px-4"
     aria-labelledby="titulo-auth"
   >
-    <!-- 🔹 Botón Home -->
     <RouterLink
       to="/"
       class="absolute top-4 right-4 bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded-lg border border-gray-700 shadow hover:bg-gray-700 focus:ring-2 focus:ring-gray-600 transition"
@@ -11,7 +10,6 @@
       ← Ir a Home
     </RouterLink>
 
-    <!-- 🔸 Contenedor principal -->
     <div
       class="w-full max-w-md bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6 text-white"
       role="form"
@@ -24,9 +22,9 @@
         Ingresá o creá una cuenta para continuar
       </p>
 
-      <!-- Tabs -->
       <div class="flex mb-4 border-b border-gray-700">
         <button
+          type="button"
           class="flex-1 py-2 text-center font-medium transition-colors"
           :class="mode === 'login'
             ? 'text-white border-b-2 border-gray-500'
@@ -36,6 +34,7 @@
           Ingresar
         </button>
         <button
+          type="button"
           class="flex-1 py-2 text-center font-medium transition-colors"
           :class="mode === 'register'
             ? 'text-white border-b-2 border-gray-500'
@@ -46,7 +45,6 @@
         </button>
       </div>
 
-      <!-- Formulario -->
       <form @submit.prevent="handleSubmit" novalidate class="flex flex-col gap-4">
         <div>
           <label for="email" class="block text-sm text-gray-400">

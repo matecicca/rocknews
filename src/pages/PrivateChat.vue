@@ -3,12 +3,10 @@
       <div v-if="loading" class="text-gray-400 text-center py-10">Cargando conversación...</div>
 
       <div v-else class="bg-gray-800 rounded-xl shadow border border-gray-700 flex flex-col h-[80vh]">
-        <!-- Header -->
         <header class="bg-gray-900 border-b border-gray-700 px-4 py-3 text-center">
           <h2 class="font-semibold text-lg m-0">Conversación con {{ otherUserName || 'Usuario' }}</h2>
         </header>
-  
-        <!-- Mensajes -->
+
         <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
           <div
             v-for="msg in messages"
@@ -26,8 +24,7 @@
             </div>
           </div>
         </div>
-  
-        <!-- Input -->
+
         <form @submit.prevent="handleSend" class="border-t border-gray-700 p-4 flex gap-3">
           <label for="chat-message" class="sr-only">Mensaje de chat</label>
           <input
@@ -72,15 +69,15 @@
   }
   
   onMounted(async () => {
-  // Esperar sesión lista
-  const s = await getSession()
-  if (!s?.user?.id) {
-    console.warn('No hay sesión activa — redirigiendo...')
+  // Validar que hay sesión activa
+  const userSession = await getSession()
+  if (!userSession?.user?.id) {
+    console.warn('No hay sesión activa — redirigiendo a auth')
     window.location.href = '/auth'
     return
   }
 
-  // Cargar perfil del otro usuario
+  // Cargar datos del otro usuario
   try {
     const profile = await getProfile(otherUserId)
     otherUserName.value = profile?.username || 'Usuario'
@@ -88,7 +85,6 @@
     console.error('Error cargando perfil:', e)
   }
 
-  // Iniciar chat recién cuando la sesión está confirmada
   await initChat()
 })
   </script>

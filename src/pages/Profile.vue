@@ -2,7 +2,6 @@
   <section
     class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 max-w-6xl mx-auto px-4 py-10 text-white"
   >
-    <!-- COLUMNA IZQUIERDA: publicaciones -->
     <div
       class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700 overflow-y-auto max-h-[80vh]"
     >
@@ -28,10 +27,8 @@
       </div>
     </div>
 
-    <!-- COLUMNA DERECHA: perfil -->
     <div class="flex flex-col gap-6">
       <div class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700">
-        <!-- Avatar centrado -->
         <div v-if="!loading && profile" class="flex justify-center mb-4">
           <div class="w-24 h-24 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
             <img
@@ -59,9 +56,9 @@
           <p><strong>Bio:</strong> {{ profile.bio || '—' }}</p>
         </div>
 
-        <!-- BOTÓN DE MENSAJE PRIVADO -->
         <div v-if="session?.user?.id !== profile?.id" class="mt-4">
           <button
+            type="button"
             @click="handlePrivateMessage"
             class="w-full btn btn-primary text-sm py-2 px-4 mt-2 transition hover:bg-gray-700"
           >
@@ -115,13 +112,13 @@ onMounted(async () => {
  */
 async function handlePrivateMessage() {
   try {
-    const s = await getSession()
-    if (!s?.user?.id) {
+    const userSession = await getSession()
+    if (!userSession?.user?.id) {
       router.push('/auth')
       return
     }
 
-    const currentUserId = s.user.id
+    const currentUserId = userSession.user.id
     const otherUserId = profile.value.id
 
     // Crear o recuperar conversación

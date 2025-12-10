@@ -27,14 +27,14 @@ export function usePrivateChat(otherUserId) {
       loading.value = true
 
       // Esperar sesión establecida
-      const s = await getSession()
-      if (!s?.user?.id) {
+      const userSession = await getSession()
+      if (!userSession?.user?.id) {
         console.warn('No hay sesión activa en initChat')
         loading.value = false
         return
       }
 
-      const userId = s.user.id
+      const userId = userSession.user.id
       if (!otherUserId) {
         console.error('No se recibió otherUserId')
         loading.value = false
@@ -83,13 +83,13 @@ export function usePrivateChat(otherUserId) {
    * Enviar un nuevo mensaje.
    */
   async function sendMessage(content) {
-    const s = await getSession()
-    if (!conversationId.value || !s?.user?.id) {
+    const userSession = await getSession()
+    if (!conversationId.value || !userSession?.user?.id) {
       console.error('No hay sesión o conversación activa')
       return
     }
 
-    const msg = await sendPrivateMessage(conversationId.value, s.user.id, content)
+    const msg = await sendPrivateMessage(conversationId.value, userSession.user.id, content)
     messages.value.push(msg)
   }
 

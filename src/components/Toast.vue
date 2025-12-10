@@ -1,7 +1,15 @@
 <template>
   <transition name="fade">
     <div v-if="message" class="toast" :class="toastClass">
-      {{ message }}
+      <span>{{ message }}</span>
+      <button
+        type="button"
+        @click="$emit('close')"
+        class="ml-3 text-white hover:text-gray-300 font-bold"
+        aria-label="Cerrar notificación"
+      >
+        ✕
+      </button>
     </div>
   </transition>
 </template>
@@ -13,6 +21,8 @@ const props = defineProps({
   message: { type: String, default: '' },
   type: { type: String, default: 'info' }
 })
+
+defineEmits(['close'])
 
 const toastClass = computed(() => {
   switch (props.type) {

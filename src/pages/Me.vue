@@ -2,7 +2,6 @@
   <section
     class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 max-w-6xl mx-auto px-4 py-10 text-white"
   >
-    <!-- COLUMNA IZQUIERDA: publicaciones -->
     <div
       class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700 overflow-y-auto max-h-[80vh]"
     >
@@ -26,10 +25,8 @@
       </div>
     </div>
 
-    <!-- COLUMNA DERECHA: perfil -->
     <div class="flex flex-col gap-6">
       <div class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700">
-        <!-- Avatar centrado -->
         <div class="flex justify-center mb-4">
           <div class="w-24 h-24 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
             <img
@@ -58,7 +55,7 @@
         </div>
 
         <div class="mt-5 flex flex-wrap gap-2">
-          <button class="btn btn-ghost btn-nowrap" @click="refreshProfile">
+          <button type="button" class="btn btn-ghost btn-nowrap" @click="refreshProfile">
             Refrescar
           </button>
           <RouterLink
@@ -69,6 +66,7 @@
             Editar perfil
           </RouterLink>
           <button
+            type="button"
             class="btn btn-primary btn-nowrap"
             @click="logout"
             :disabled="!session"
@@ -104,8 +102,8 @@ const avatarUrl = computed(() => getAvatarUrl(avatar_path.value))
 
 async function loadProfile() {
   try {
-    const s = await getSession()
-    const userId = s?.user?.id
+    const userSession = await getSession()
+    const userId = userSession?.user?.id
     if (!userId) return
     const profile = await getProfile(userId)
     if (profile) {
@@ -121,8 +119,8 @@ async function loadProfile() {
 
 async function loadUserPosts() {
   try {
-    const s = await getSession()
-    const userId = s?.user?.id
+    const userSession = await getSession()
+    const userId = userSession?.user?.id
     if (!userId) return
     userPosts.value = await listUserPosts(userId)
   } finally {

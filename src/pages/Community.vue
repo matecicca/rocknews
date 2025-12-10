@@ -8,7 +8,11 @@
       <li
         v-for="u in profiles"
         :key="u.id"
+        role="button"
+        tabindex="0"
         @click="goToProfile(u.id)"
+        @keydown.enter="goToProfile(u.id)"
+        @keydown.space.prevent="goToProfile(u.id)"
         class="user-card cursor-pointer rounded-lg border border-gray-700 bg-gray-800 p-4 transition-transform transform hover:-translate-y-1 hover:shadow-lg"
       >
         <div class="flex items-center gap-3 mb-3">

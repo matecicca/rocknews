@@ -29,7 +29,6 @@
       </div>
     </div>
 
-    <!-- 🔹 Imagen decorativa inferior -->
     <div class="mt-16 opacity-10">
       <svg
         xmlns="http://www.w3.org/2000/svg"

@@ -3,7 +3,6 @@
     @submit.prevent="submit"
     class="space-y-4 text-white"
   >
-    <!-- Agregar imagen -->
     <div>
       <label for="post-image" class="cursor-pointer text-gray-400 hover:text-white transition">
         <span class="text-sm">Agregar una imagen</span>
@@ -17,7 +16,6 @@
       </label>
     </div>
 
-    <!-- Campo de texto -->
     <div>
       <label for="post-content" class="sr-only">Contenido de la publicación</label>
       <textarea
@@ -28,7 +26,6 @@
       ></textarea>
     </div>
 
-    <!-- Vista previa de imagen -->
     <div v-if="imagePreview" class="relative">
       <img :src="imagePreview" alt="Preview" class="max-h-60 rounded-lg" />
       <button
@@ -40,7 +37,6 @@
       </button>
     </div>
 
-    <!-- Footer -->
     <div class="flex items-center justify-between">
       <div class="text-xs text-gray-400">
         Como: <strong class="text-gray-200">{{ displayName }}</strong>

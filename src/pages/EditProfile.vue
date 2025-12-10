@@ -1,6 +1,5 @@
 <template>
   <section class="max-w-3xl mx-auto px-4 py-10 text-white space-y-10">
-    <!-- Botón para volver -->
     <RouterLink
       to="/me"
       class="inline-block bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded-lg border border-gray-700 shadow hover:bg-gray-700 transition"
@@ -8,7 +7,6 @@
       ← Volver al perfil
     </RouterLink>
 
-    <!-- Formulario de edición -->
     <form
       @submit.prevent="handleSave"
       class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700 space-y-4"
@@ -16,7 +14,6 @@
       <h2 class="text-xl font-semibold text-white">Editar perfil</h2>
 
       <div class="flex flex-col gap-4">
-        <!-- Avatar -->
         <div>
           <label for="avatar" class="block text-sm text-gray-400 mb-2">Foto de perfil</label>
           <div class="flex items-center gap-4">
@@ -72,7 +69,6 @@
       </div>
     </form>
 
-    <!-- Formulario de cambio de contraseña -->
     <div class="bg-gray-800 p-6 rounded-xl shadow border border-gray-700">
       <h2 class="text-lg font-semibold mb-4">Cambiar contraseña</h2>
       <form @submit.prevent="handlePasswordChange" class="flex flex-col gap-3">
@@ -122,8 +118,8 @@ const avatarPreview = computed(() => {
 })
 
 async function loadProfile() {
-  const s = await getSession()
-  const userId = s?.user?.id
+  const userSession = await getSession()
+  const userId = userSession?.user?.id
   if (!userId) return
   const profile = await getProfile(userId)
   if (profile) {
@@ -144,8 +140,8 @@ function handleAvatarChange(event) {
 async function handleSave() {
   loadingProfile.value = true
   try {
-    const s = await getSession()
-    const userId = s?.user?.id
+    const userSession = await getSession()
+    const userId = userSession?.user?.id
 
     let newAvatarPath = avatar_path.value
 

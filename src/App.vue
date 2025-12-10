@@ -6,8 +6,7 @@
       </transition>
     </RouterView>
 
-    <!-- Toast global -->
-    <Toast :message="toastMessage" :type="toastType" />
+    <Toast :message="toastMessage" :type="toastType" @close="closeToast" />
   </component>
 </template>
 
@@ -23,14 +22,37 @@ const layoutComponent = computed(() => AppLayout)
 // Sistema global de notificaciones
 const toastMessage = ref('')
 const toastType = ref('info')
+const toastTimeoutId = ref(null)
 
-function showToast(message, type = 'info') {
+function showToast(message, type = 'info', duration = 0) {
+  // Limpiar timeout anterior si existe
+  if (toastTimeoutId.value) {
+    clearTimeout(toastTimeoutId.value)
+    toastTimeoutId.value = null
+  }
+
   toastMessage.value = message
   toastType.value = type
-  setTimeout(() => (toastMessage.value = ''), 2500)
+
+  // Configurar auto-cierre solo si duration es mayor a 0
+  if (duration > 0) {
+    toastTimeoutId.value = setTimeout(() => {
+      toastMessage.value = ''
+      toastTimeoutId.value = null
+    }, duration)
+  }
+}
+
+function closeToast() {
+  if (toastTimeoutId.value) {
+    clearTimeout(toastTimeoutId.value)
+    toastTimeoutId.value = null
+  }
+  toastMessage.value = ''
 }
 
 provide('showToast', showToast)
+provide('closeToast', closeToast)
 </script>
 
 <style>

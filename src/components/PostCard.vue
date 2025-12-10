@@ -2,10 +2,8 @@
   <article
     class="p-4 rounded-lg border border-gray-700/40 bg-gray-800/50 transition hover:border-gray-500/60 space-y-3"
   >
-    <!-- Header -->
     <header class="flex items-start justify-between">
       <div class="flex items-center gap-3">
-        <!-- Avatar -->
         <RouterLink
           v-if="post.profiles?.id"
           :to="getProfileLink(post.profiles.id)"
@@ -24,7 +22,6 @@
           </div>
         </RouterLink>
 
-        <!-- User info -->
         <div class="text-sm">
           <h3 class="text-base font-medium text-white m-0">
             <RouterLink
@@ -41,10 +38,10 @@
         </div>
       </div>
 
-      <!-- Actions for own posts -->
       <div v-if="isOwnPost" class="flex gap-2">
         <button
           v-if="!editing"
+          type="button"
           @click="startEdit"
           class="text-gray-400 hover:text-blue-400 text-sm px-2 py-1 cursor-pointer"
           title="Editar"
@@ -52,6 +49,7 @@
           ✏️
         </button>
         <button
+          type="button"
           @click="handleDelete"
           class="text-gray-400 hover:text-red-400 text-sm px-2 py-1 cursor-pointer"
           title="Eliminar"
@@ -61,21 +59,21 @@
       </div>
     </header>
 
-    <!-- Content -->
-    <div v-if="editing" class="space-y-2">
+    <form v-if="editing" class="space-y-2" @submit.prevent="saveEdit">
+      <label for="edit-post-content" class="sr-only">Editar contenido de la publicación</label>
       <textarea
+        id="edit-post-content"
         v-model="editedContent"
         class="textarea bg-gray-900 border-gray-700 text-white w-full"
         rows="3"
       ></textarea>
       <div class="flex gap-2">
-        <button @click="saveEdit" class="btn btn-primary btn-sm">Guardar</button>
-        <button @click="cancelEdit" class="btn btn-ghost btn-sm">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+        <button type="button" @click="cancelEdit" class="btn btn-ghost btn-sm">Cancelar</button>
       </div>
-    </div>
+    </form>
     <p v-else class="whitespace-pre-wrap text-gray-200">{{ post.content }}</p>
 
-    <!-- Image -->
     <div v-if="post.image_path" class="mt-3">
       <img
         :src="getImageUrl(post.image_path)"
@@ -84,9 +82,9 @@
       />
     </div>
 
-    <!-- Comments section -->
     <div class="mt-4 pt-4 border-t border-gray-700/50 space-y-3">
       <button
+        type="button"
         @click="toggleComments"
         class="text-sm text-gray-400 hover:text-white transition cursor-pointer"
       >
@@ -94,7 +92,6 @@
       </button>
 
       <div v-if="showComments" class="space-y-3">
-        <!-- Comment list -->
         <div v-if="comments.length > 0" class="space-y-2 max-h-60 overflow-y-auto">
           <div
             v-for="comment in comments"
@@ -120,6 +117,7 @@
               </div>
               <button
                 v-if="isOwnComment(comment)"
+                type="button"
                 @click="deleteCommentHandler(comment.id)"
                 class="text-gray-500 hover:text-red-400 text-xs cursor-pointer"
                 title="Eliminar comentario"
@@ -130,9 +128,10 @@
           </div>
         </div>
 
-        <!-- New comment form -->
         <form @submit.prevent="addComment" class="flex gap-2">
+          <label for="comment-input" class="sr-only">Escribe un comentario</label>
           <input
+            id="comment-input"
             v-model="newComment"
             type="text"
             placeholder="Escribe un comentario..."
@@ -148,6 +147,15 @@
         </form>
       </div>
     </div>
+
+    <ConfirmDialog
+      :is-open="confirmDialogOpen"
+      :title="confirmDialogData.title"
+      :message="confirmDialogData.message"
+      :preview="confirmDialogData.preview"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+    />
   </article>
 </template>
 
@@ -157,6 +165,7 @@ import { useAuth } from '@/composables/useAuth'
 import { updatePost, deletePost, getPostImageUrl, deletePostImage } from '@/services/postService'
 import { getAvatarUrl } from '@/services/profileService'
 import { listComments, createComment, deleteComment, getCommentsCount, subscribeToComments } from '@/services/commentService'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const props = defineProps({
   post: { type: Object, required: true }
@@ -174,6 +183,15 @@ const comments = ref([])
 const commentCount = ref(0)
 const newComment = ref('')
 let unsubscribe = null
+
+// Estados del modal de confirmación
+const confirmDialogOpen = ref(false)
+const confirmDialogData = ref({
+  title: '',
+  message: '',
+  preview: '',
+  onConfirm: null
+})
 
 const isOwnPost = computed(() => {
   return session.value?.user?.id === props.post.author_id
@@ -206,7 +224,6 @@ function isOwnComment(comment) {
   return session.value?.user?.id === comment.author_id
 }
 
-// Edit functionality
 function startEdit() {
   editing.value = true
   editedContent.value = props.post.content
@@ -230,21 +247,31 @@ async function saveEdit() {
   }
 }
 
-async function handleDelete() {
-  if (!confirm('¿Estás seguro de eliminar esta publicación?')) return
-  try {
-    // Eliminar imagen del bucket si existe
-    if (props.post.image_path) {
-      await deletePostImage(props.post.image_path)
-    }
+function handleDelete() {
+  const preview = props.post.content.substring(0, 50) + (props.post.content.length > 50 ? '...' : '')
 
-    await deletePost(props.post.id)
-    emit('deleted', props.post.id)
-    showToast('Post eliminado', 'success')
-  } catch (err) {
-    console.error(err)
-    showToast('Error al eliminar', 'error')
+  confirmDialogData.value = {
+    title: '¿Eliminar esta publicación?',
+    message: 'Se eliminará permanentemente esta publicación.',
+    preview: preview,
+    onConfirm: async () => {
+      try {
+        // Limpiar imagen de Supabase Storage antes de eliminar el registro
+        if (props.post.image_path) {
+          await deletePostImage(props.post.image_path)
+        }
+
+        await deletePost(props.post.id)
+        emit('deleted', props.post.id)
+        showToast('Post eliminado', 'success')
+      } catch (err) {
+        console.error(err)
+        showToast(`Error al eliminar la publicación: ${err.message || 'Por favor intenta nuevamente'}`, 'error')
+      }
+    }
   }
+
+  confirmDialogOpen.value = true
 }
 
 // Comments functionality
@@ -303,18 +330,43 @@ async function addComment() {
   }
 }
 
-async function deleteCommentHandler(commentId) {
-  if (!confirm('¿Eliminar este comentario?')) return
-  try {
-    await deleteComment(commentId)
+function deleteCommentHandler(commentId) {
+  const comment = comments.value.find(c => c.id === commentId)
+  if (!comment) return
 
-    // Eliminar el comentario inmediatamente del array local
-    comments.value = comments.value.filter(c => c.id !== commentId)
-    commentCount.value--
-  } catch (err) {
-    console.error(err)
-    showToast('Error al eliminar comentario', 'error')
+  const preview = comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : '')
+
+  confirmDialogData.value = {
+    title: '¿Eliminar este comentario?',
+    message: 'Se eliminará permanentemente este comentario.',
+    preview: preview,
+    onConfirm: async () => {
+      try {
+        await deleteComment(commentId)
+
+        // Eliminar el comentario inmediatamente del array local
+        comments.value = comments.value.filter(c => c.id !== commentId)
+        commentCount.value--
+        showToast('Comentario eliminado', 'success')
+      } catch (err) {
+        console.error(err)
+        showToast('Error al eliminar comentario', 'error')
+      }
+    }
   }
+
+  confirmDialogOpen.value = true
+}
+
+async function handleConfirm() {
+  if (confirmDialogData.value.onConfirm) {
+    await confirmDialogData.value.onConfirm()
+  }
+  confirmDialogOpen.value = false
+}
+
+function handleCancel() {
+  confirmDialogOpen.value = false
 }
 
 onMounted(() => {
