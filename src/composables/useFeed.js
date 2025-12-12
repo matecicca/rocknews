@@ -61,7 +61,12 @@ export function useFeed() {
    * @param {string} eventType - Tipo de evento (INSERT, UPDATE, DELETE).
    */
   function handleRealtime(post, eventType) {
-    if (eventType === 'INSERT') prepend(post)
+    if (eventType === 'INSERT') {
+      // Solo agregar si no existe ya (evita duplicados cuando se crea localmente)
+      if (!posts.value.find(p => p.id === post.id)) {
+        prepend(post)
+      }
+    }
     if (eventType === 'UPDATE') {
       const index = posts.value.findIndex(p => p.id === post.id)
       if (index !== -1) posts.value[index] = post
