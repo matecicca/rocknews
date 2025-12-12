@@ -1,6 +1,6 @@
 <template>
     <section class="max-w-4xl mx-auto px-4 py-6 text-white">
-      <div v-if="loading" class="text-gray-400 text-center py-10">Cargando conversación...</div>
+      <Loader v-if="loading" size="md" text="Cargando conversación..." />
 
       <div v-else class="bg-gray-800 rounded-xl shadow border border-gray-700 flex flex-col h-[80vh]">
         <header class="bg-gray-900 border-b border-gray-700 px-4 py-3 text-center">
@@ -52,6 +52,7 @@
   import { useAuth } from '@/composables/useAuth'
   import { usePrivateChat } from '@/composables/usePrivateChat'
   import { getProfile } from '@/services/profileService'
+  import Loader from '@/components/Loader.vue'
   
   // Estado y dependencias
   const route = useRoute()

@@ -35,7 +35,7 @@ const toastMessage = ref('')
 const toastType = ref('info')
 const toastTimeoutId = ref(null)
 
-function showToast(message, type = 'info', duration = 0) {
+function showToast(message, type = 'info', duration = null) {
   // Limpiar timeout anterior si existe
   if (toastTimeoutId.value) {
     clearTimeout(toastTimeoutId.value)
@@ -44,6 +44,13 @@ function showToast(message, type = 'info', duration = 0) {
 
   toastMessage.value = message
   toastType.value = type
+
+  // Si no se especifica duración, determinar según el tipo
+  if (duration === null) {
+    // Error: no se cierra automáticamente (duration = 0)
+    // Success/Info/Warning: se cierra después de 4 segundos
+    duration = type === 'error' ? 0 : 4000
+  }
 
   // Configurar auto-cierre solo si duration es mayor a 0
   if (duration > 0) {

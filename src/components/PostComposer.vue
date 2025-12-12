@@ -46,7 +46,8 @@
         class="btn btn-primary btn-nowrap"
         :disabled="submitting || !content.trim()"
       >
-        {{ submitting ? 'Publicando...' : 'Publicar' }}
+        <Loader v-if="submitting" size="xs" inline />
+        <span v-else>Publicar</span>
       </button>
     </div>
   </form>
@@ -56,6 +57,7 @@
 import { ref, computed, inject } from 'vue'
 import { createPost, uploadPostImage } from '@/services/postService'
 import { useAuth } from '@/composables/useAuth'
+import Loader from '@/components/Loader.vue'
 
 const showToast = inject('showToast', () => {})
 const { session } = useAuth()

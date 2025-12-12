@@ -2,7 +2,7 @@
   <section class="max-w-6xl mx-auto px-4 py-10 text-white space-y-6">
     <h2 class="text-2xl font-semibold">Comunidad</h2>
 
-    <div v-if="loading" class="text-gray-400">Cargando usuarios...</div>
+    <Loader v-if="loading" size="md" text="Cargando usuarios..." />
 
     <ul v-else class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <li
@@ -80,6 +80,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useAdmin } from '@/composables/useAdmin'
 import { getAvatarUrl, adminDeleteProfile } from '@/services/profileService'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import Loader from '@/components/Loader.vue'
 
 const { profiles, loading, fetchProfiles } = useProfiles()
 const { session } = useAuth()

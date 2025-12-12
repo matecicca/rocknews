@@ -12,12 +12,7 @@
       />
     </div>
 
-    <div
-      v-if="loading"
-      class="text-center text-gray-400 bg-gray-800 border border-gray-700 p-4 rounded-xl max-w-2xl mx-auto"
-    >
-      Cargando publicaciones...
-    </div>
+    <Loader v-if="loading" size="md" text="Cargando publicaciones..." />
 
     <div
       v-else-if="posts.length === 0"
@@ -42,6 +37,7 @@
 import { onMounted } from 'vue'
 import PostCard from '@/components/PostCard.vue'
 import PostComposer from '@/components/PostComposer.vue'
+import Loader from '@/components/Loader.vue'
 import { useFeed } from '@/composables/useFeed'
 import { useAdmin } from '@/composables/useAdmin'
 

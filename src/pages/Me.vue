@@ -7,9 +7,7 @@
     >
       <h2 class="text-xl font-semibold text-white mb-4">Mis publicaciones</h2>
 
-      <div v-if="loadingPosts" class="text-gray-400 text-sm">
-        Cargando publicaciones...
-      </div>
+      <Loader v-if="loadingPosts" size="sm" text="Cargando publicaciones..." />
 
       <div v-else-if="userPosts.length === 0" class="text-gray-500 text-sm">
         Todavía no has publicado nada.
@@ -92,6 +90,7 @@ import { useAdmin } from '@/composables/useAdmin'
 import { getProfile, getAvatarUrl } from '@/services/profileService'
 import { listUserPosts } from '@/services/postService'
 import PostCard from '@/components/PostCard.vue'
+import Loader from '@/components/Loader.vue'
 import { useRouter } from 'vue-router'
 
 const { session, getSession, signOut } = useAuth()

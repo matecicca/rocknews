@@ -80,7 +80,8 @@
           :disabled="loading"
           class="w-full bg-gray-700 text-white font-medium py-2 px-4 rounded-md border border-gray-600 hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:outline-none transition disabled:opacity-50"
         >
-          {{ loading ? 'Cargando...' : mode === 'login' ? 'Ingresar' : 'Registrarse' }}
+          <Loader v-if="loading" size="xs" inline />
+          <span v-else>{{ mode === 'login' ? 'Ingresar' : 'Registrarse' }}</span>
         </button>
       </form>
     </div>
@@ -92,6 +93,7 @@ import { ref, inject } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { signIn, signUp } from '@/services/authService'
 import { upsertProfile } from '@/services/profileService'
+import Loader from '@/components/Loader.vue'
 
 const router = useRouter()
 const route = useRoute()
