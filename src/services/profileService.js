@@ -13,7 +13,7 @@ import { supabase } from './supabaseClient'
 export async function getProfile(id) {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, full_name, bio, avatar_path, created_at')
+    .select('id, username, full_name, bio, avatar_path, created_at, is_admin')
     .eq('id', id)
     .single()
 
@@ -34,7 +34,7 @@ export async function getProfile(id) {
 export async function listProfiles({ limit = 50 } = {}) {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, full_name, bio, avatar_path')
+    .select('id, username, full_name, bio, avatar_path, is_admin')
     .order('username', { ascending: true })
     .limit(limit)
 
@@ -114,4 +114,58 @@ export async function deleteAvatar(path) {
     .from('avatars')
     .remove([path])
   if (error) console.error('Error eliminando avatar:', error)
+}
+
+// =============================================
+// FUNCIONES DE ADMINISTRACIÓN
+// =============================================
+
+/**
+ * Actualiza un perfil como administrador (puede actualizar cualquier perfil).
+ * Las RLS en Supabase validan que el usuario sea admin.
+ * @param {string} profileId - ID del perfil a actualizar.
+ * @param {object} updates - Datos a actualizar.
+ * @returns {Promise<object>} Perfil actualizado.
+ * @throws {Error} Si ocurre un error al actualizar.
+ */
+export async function adminUpdateProfile(profileId, updates) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', profileId)
+    .select('id, username, full_name, bio, avatar_path, created_at, is_admin')
+    .single()
+
+  if (error) {
+    console.error('Error adminUpdateProfile:', error)
+    throw error
+  }
+
+  return data
+}
+
+/**
+ * Elimina un perfil como administrador (puede eliminar cualquier perfil).
+ * Las RLS en Supabase validan que el usuario sea admin.
+ * También elimina el avatar del storage si existe.
+ * @param {string} profileId - ID del perfil a eliminar.
+ * @param {string} [avatarPath] - Ruta del avatar a eliminar (opcional).
+ * @returns {Promise<void>}
+ * @throws {Error} Si ocurre un error al eliminar.
+ */
+export async function adminDeleteProfile(profileId, avatarPath = null) {
+  // Eliminar avatar si existe
+  if (avatarPath) {
+    await deleteAvatar(avatarPath)
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .delete()
+    .eq('id', profileId)
+
+  if (error) {
+    console.error('Error adminDeleteProfile:', error)
+    throw error
+  }
 }

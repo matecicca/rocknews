@@ -64,7 +64,8 @@
           :disabled="loadingProfile"
           class="btn btn-primary w-full"
         >
-          {{ loadingProfile ? 'Guardando...' : 'Guardar cambios' }}
+          <Loader v-if="loadingProfile" size="xs" inline />
+          <span v-else>Guardar cambios</span>
         </button>
       </div>
     </form>
@@ -98,6 +99,7 @@ import { RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { getProfile, upsertProfile, uploadAvatar, getAvatarUrl } from '@/services/profileService'
 import { updatePassword } from '@/services/authService'
+import Loader from '@/components/Loader.vue'
 
 const { getSession } = useAuth()
 const showToast = inject('showToast', () => {})

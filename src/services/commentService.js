@@ -165,3 +165,51 @@ export function subscribeToComments(postId, onChange) {
 
   return () => supabase.removeChannel(channel)
 }
+
+// =============================================
+// FUNCIONES DE ADMINISTRACIÓN
+// =============================================
+
+/**
+ * Actualiza un comentario como administrador (puede actualizar cualquier comentario).
+ * Las RLS en Supabase validan que el usuario sea admin.
+ * @param {string} commentId - ID del comentario a actualizar.
+ * @param {object} updates - Datos a actualizar.
+ * @returns {Promise<object>} Comentario actualizado con perfil del autor.
+ * @throws {Error} Si ocurre un error.
+ */
+export async function adminUpdateComment(commentId, updates) {
+  const { data, error } = await supabase
+    .from('comments')
+    .update(updates)
+    .eq('id', commentId)
+    .select('id, content, created_at, post_id, author_id')
+    .single()
+
+  if (error) throw error
+
+  // Enriquecer con perfil del autor
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, avatar_path')
+    .eq('id', data.author_id)
+    .single()
+
+  return { ...data, profiles: profile || null }
+}
+
+/**
+ * Elimina un comentario como administrador (puede eliminar cualquier comentario).
+ * Las RLS en Supabase validan que el usuario sea admin.
+ * @param {string} commentId - ID del comentario a eliminar.
+ * @returns {Promise<void>}
+ * @throws {Error} Si ocurre un error.
+ */
+export async function adminDeleteComment(commentId) {
+  const { error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', commentId)
+
+  if (error) throw error
+}

@@ -7,9 +7,7 @@
     >
       <h2 class="text-xl font-semibold text-white mb-4">Mis publicaciones</h2>
 
-      <div v-if="loadingPosts" class="text-gray-400 text-sm">
-        Cargando publicaciones...
-      </div>
+      <Loader v-if="loadingPosts" size="sm" text="Cargando publicaciones..." />
 
       <div v-else-if="userPosts.length === 0" class="text-gray-500 text-sm">
         Todavía no has publicado nada.
@@ -41,7 +39,13 @@
           </div>
         </div>
 
-        <h2 class="text-xl font-semibold text-white mb-3">Mi cuenta</h2>
+        <div class="flex items-center gap-2 mb-3">
+          <h2 class="text-xl font-semibold text-white">Mi cuenta</h2>
+          <!-- Badge de administrador -->
+          <span v-if="isAdmin" class="admin-badge">
+            Admin
+          </span>
+        </div>
 
         <p class="text-sm text-gray-400 mb-1">
           <strong>Estado:</strong> {{ session ? 'Conectado' : 'Desconectado' }}
@@ -82,12 +86,15 @@
 <script setup>
 import { ref, computed, onMounted, inject } from 'vue'
 import { useAuth } from '@/composables/useAuth'
+import { useAdmin } from '@/composables/useAdmin'
 import { getProfile, getAvatarUrl } from '@/services/profileService'
 import { listUserPosts } from '@/services/postService'
 import PostCard from '@/components/PostCard.vue'
+import Loader from '@/components/Loader.vue'
 import { useRouter } from 'vue-router'
 
 const { session, getSession, signOut } = useAuth()
+const { isAdmin } = useAdmin()
 const showToast = inject('showToast', () => {})
 const router = useRouter()
 

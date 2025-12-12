@@ -1,6 +1,7 @@
 <template>
   <section class="max-w-7xl mx-auto px-4 py-10 text-white space-y-6">
-    <div class="bg-gray-800 rounded-xl shadow-md p-4 border border-gray-700">
+    <!-- Ocultar PostComposer para administradores -->
+    <div v-if="!isAdmin" class="bg-gray-800 rounded-xl shadow-md p-4 border border-gray-700">
       <h3 class="text-lg font-semibold text-white mb-3">
         ¿Qué estás pensando?
       </h3>
@@ -11,12 +12,7 @@
       />
     </div>
 
-    <div
-      v-if="loading"
-      class="text-center text-gray-400 bg-gray-800 border border-gray-700 p-4 rounded-xl max-w-2xl mx-auto"
-    >
-      Cargando publicaciones...
-    </div>
+    <Loader v-if="loading" size="md" text="Cargando publicaciones..." />
 
     <div
       v-else-if="posts.length === 0"
@@ -41,9 +37,12 @@
 import { onMounted } from 'vue'
 import PostCard from '@/components/PostCard.vue'
 import PostComposer from '@/components/PostComposer.vue'
+import Loader from '@/components/Loader.vue'
 import { useFeed } from '@/composables/useFeed'
+import { useAdmin } from '@/composables/useAdmin'
 
 const { posts, loading, fetchFirstPage, prepend } = useFeed()
+const { isAdmin } = useAdmin()
 
 function handleDeleted(postId) {
   const index = posts.value.findIndex(p => p.id === postId)
