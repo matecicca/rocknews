@@ -84,14 +84,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, onUnmounted, inject, onActivated } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import { useAdmin } from '@/composables/useAdmin'
 import { getProfile, getAvatarUrl } from '@/services/profileService'
 import { listUserPosts } from '@/services/postService'
 import PostCard from '@/components/PostCard.vue'
 import Loader from '@/components/Loader.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 
 const { session, getSession, signOut } = useAuth()
 const { isAdmin } = useAdmin()
@@ -150,8 +150,46 @@ async function logout() {
   router.push('/auth')
 }
 
+// Verificar si el perfil fue actualizado recientemente
+let lastProfileUpdate = ''
+
+function checkProfileUpdate() {
+  const updated = localStorage.getItem('profileUpdated')
+  if (updated && updated !== lastProfileUpdate) {
+    lastProfileUpdate = updated
+    loadProfile()
+    localStorage.removeItem('profileUpdated')
+  }
+}
+
+// Handler para el evento visibilitychange
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    checkProfileUpdate()
+  }
+}
+
 onMounted(() => {
+  checkProfileUpdate()
   loadProfile()
   loadUserPosts()
+
+  // Escuchar cuando la página vuelve a ser visible
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+})
+
+// Limpiar listener al desmontar
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+})
+
+// Refrescar automáticamente cuando el componente se activa (vuelve de otra vista)
+onActivated(() => {
+  checkProfileUpdate()
+})
+
+// También refrescar si la ruta se actualiza
+onBeforeRouteUpdate(() => {
+  checkProfileUpdate()
 })
 </script>

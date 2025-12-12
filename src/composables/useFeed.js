@@ -3,12 +3,13 @@
  * @description Composable para manejar el feed de publicaciones y su actualización en tiempo real.
  */
 
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { listFeed, subscribeToPosts } from '@/services/postService'
 
 const posts = ref([])
 const loading = ref(false)
 const loadingMore = ref(false)
+const error = ref(null)
 let unsubscribe = null
 
 /**
@@ -29,11 +30,18 @@ export function useFeed() {
    */
   async function fetchFirstPage() {
     loading.value = true
-    posts.value = await listFeed({ limit: 20 })
-    loading.value = false
-
-    // Iniciar subscripción realtime solo una vez
-    if (!unsubscribe) unsubscribe = subscribeToPosts(handleRealtime)
+    error.value = null
+    try {
+      posts.value = await listFeed({ limit: 20 })
+      // Iniciar subscripción realtime solo una vez
+      if (!unsubscribe) unsubscribe = subscribeToPosts(handleRealtime)
+    } catch (err) {
+      console.error('Error cargando feed:', err)
+      error.value = err.message || 'Error al cargar el feed'
+      posts.value = []
+    } finally {
+      loading.value = false
+    }
   }
 
   /**
@@ -42,9 +50,15 @@ export function useFeed() {
    */
   async function fetchNextPage() {
     loadingMore.value = true
-    const more = await listFeed({ limit: 20 })
-    posts.value = [...posts.value, ...more]
-    loadingMore.value = false
+    try {
+      const more = await listFeed({ limit: 20 })
+      posts.value = [...posts.value, ...more]
+    } catch (err) {
+      console.error('Error cargando más posts:', err)
+      error.value = err.message || 'Error al cargar más publicaciones'
+    } finally {
+      loadingMore.value = false
+    }
   }
 
   /**
@@ -82,5 +96,10 @@ export function useFeed() {
     }
   }
 
-  return { posts, loading, loadingMore, fetchFirstPage, fetchNextPage, prepend, stopRealtime }
+  // Limpiar subscripción automáticamente cuando el componente se desmonte
+  onUnmounted(() => {
+    stopRealtime()
+  })
+
+  return { posts, loading, loadingMore, error, fetchFirstPage, fetchNextPage, prepend, stopRealtime }
 }

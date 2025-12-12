@@ -18,8 +18,12 @@ export async function getProfile(id) {
     .single()
 
   if (error) {
+    // Si es un error de "no encontrado", retornamos null sin lanzar
+    if (error.code === 'PGRST116') {
+      return null
+    }
     console.error('Error getProfile:', error)
-    return null
+    throw new Error(`Error al cargar perfil: ${error.message}`)
   }
 
   return data
@@ -40,10 +44,10 @@ export async function listProfiles({ limit = 50 } = {}) {
 
   if (error) {
     console.error('Error listProfiles:', error)
-    return []
+    throw new Error(`Error al cargar perfiles: ${error.message}`)
   }
 
-  return data
+  return data || []
 }
 
 /**

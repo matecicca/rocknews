@@ -46,17 +46,33 @@
             v-model="username"
             required
             class="input"
+            :class="{ 'border-red-500': formErrors.username }"
           />
+          <p v-if="formErrors.username" class="text-red-400 text-xs mt-1">{{ formErrors.username }}</p>
         </div>
 
         <div>
           <label for="full_name" class="block text-sm text-gray-400">Nombre completo</label>
-          <input id="full_name" type="text" v-model="full_name" class="input" />
+          <input
+            id="full_name"
+            type="text"
+            v-model="full_name"
+            class="input"
+            :class="{ 'border-red-500': formErrors.full_name }"
+          />
+          <p v-if="formErrors.full_name" class="text-red-400 text-xs mt-1">{{ formErrors.full_name }}</p>
         </div>
 
         <div>
           <label for="bio" class="block text-sm text-gray-400">Biografía</label>
-          <textarea id="bio" v-model="bio" rows="4" class="textarea resize-none"></textarea>
+          <textarea
+            id="bio"
+            v-model="bio"
+            rows="4"
+            class="textarea resize-none"
+            :class="{ 'border-red-500': formErrors.bio }"
+          ></textarea>
+          <p v-if="formErrors.bio" class="text-red-400 text-xs mt-1">{{ formErrors.bio }}</p>
         </div>
 
         <button
@@ -112,12 +128,53 @@ const newPassword = ref('')
 const loadingProfile = ref(false)
 const avatarFile = ref(null)
 
+const formErrors = ref({
+  username: '',
+  full_name: '',
+  bio: ''
+})
+
 const avatarPreview = computed(() => {
   if (avatarFile.value) {
     return URL.createObjectURL(avatarFile.value)
   }
   return getAvatarUrl(avatar_path.value)
 })
+
+/**
+ * Valida el formulario de perfil
+ * @returns {boolean} true si es válido
+ */
+function validateForm() {
+  formErrors.value = { username: '', full_name: '', bio: '' }
+  let isValid = true
+
+  // Validar username
+  if (!username.value.trim()) {
+    formErrors.value.username = 'El nombre de usuario es obligatorio'
+    isValid = false
+  } else if (username.value.trim().length < 3) {
+    formErrors.value.username = 'El nombre de usuario debe tener al menos 3 caracteres'
+    isValid = false
+  } else if (!/^[a-zA-Z0-9_]+$/.test(username.value.trim())) {
+    formErrors.value.username = 'El nombre de usuario solo puede contener letras, números y guiones bajos'
+    isValid = false
+  }
+
+  // Validar nombre completo (opcional, pero si existe debe tener longitud razonable)
+  if (full_name.value && full_name.value.length > 100) {
+    formErrors.value.full_name = 'El nombre completo no puede exceder 100 caracteres'
+    isValid = false
+  }
+
+  // Validar bio (opcional, pero con límite)
+  if (bio.value && bio.value.length > 500) {
+    formErrors.value.bio = 'La biografía no puede exceder 500 caracteres'
+    isValid = false
+  }
+
+  return isValid
+}
 
 async function loadProfile() {
   const userSession = await getSession()
@@ -140,6 +197,14 @@ function handleAvatarChange(event) {
 }
 
 async function handleSave() {
+  // Validar antes de enviar
+  if (!validateForm()) {
+    // Mostrar el primer error encontrado
+    const firstError = Object.values(formErrors.value).find(e => e)
+    if (firstError) showToast(firstError, 'error')
+    return
+  }
+
   loadingProfile.value = true
   try {
     const userSession = await getSession()
@@ -154,15 +219,17 @@ async function handleSave() {
 
     await upsertProfile({
       id: userId,
-      username: username.value,
-      full_name: full_name.value,
-      bio: bio.value,
+      username: username.value.trim(),
+      full_name: full_name.value.trim(),
+      bio: bio.value.trim(),
       avatar_path: newAvatarPath
     })
 
     avatar_path.value = newAvatarPath
     avatarFile.value = null
-    showToast('Perfil actualizado correctamente ✅', 'success')
+    // Marcar que el perfil fue actualizado para que Me.vue lo refresque
+    localStorage.setItem('profileUpdated', Date.now().toString())
+    showToast('Perfil actualizado correctamente', 'success')
   } catch (err) {
     console.error(err)
     showToast('Error al actualizar el perfil', 'error')
