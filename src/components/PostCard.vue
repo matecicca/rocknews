@@ -38,7 +38,7 @@
         </div>
       </div>
 
-      <div v-if="isOwnPost" class="flex gap-2">
+      <div v-if="canModifyPost" class="flex gap-2">
         <button
           v-if="!editing"
           type="button"
@@ -116,7 +116,7 @@
                 <span class="text-xs text-gray-500">{{ formatCommentDate(comment.created_at) }}</span>
               </div>
               <button
-                v-if="isOwnComment(comment)"
+                v-if="canDeleteComment(comment)"
                 type="button"
                 @click="deleteCommentHandler(comment.id)"
                 class="text-gray-500 hover:text-red-400 text-xs cursor-pointer"
@@ -162,9 +162,10 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, inject } from 'vue'
 import { useAuth } from '@/composables/useAuth'
-import { updatePost, deletePost, getPostImageUrl, deletePostImage } from '@/services/postService'
+import { useAdmin } from '@/composables/useAdmin'
+import { updatePost, deletePost, getPostImageUrl, deletePostImage, adminUpdatePost, adminDeletePost } from '@/services/postService'
 import { getAvatarUrl } from '@/services/profileService'
-import { listComments, createComment, deleteComment, getCommentsCount, subscribeToComments } from '@/services/commentService'
+import { listComments, createComment, deleteComment, getCommentsCount, subscribeToComments, adminDeleteComment } from '@/services/commentService'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const props = defineProps({
@@ -174,6 +175,7 @@ const props = defineProps({
 const emit = defineEmits(['deleted', 'updated'])
 
 const { session } = useAuth()
+const { isAdmin } = useAdmin()
 const showToast = inject('showToast', () => {})
 
 const editing = ref(false)
@@ -195,6 +197,11 @@ const confirmDialogData = ref({
 
 const isOwnPost = computed(() => {
   return session.value?.user?.id === props.post.author_id
+})
+
+// Puede modificar/eliminar el post si es propietario o admin
+const canModifyPost = computed(() => {
+  return isOwnPost.value || isAdmin.value
 })
 
 const avatarUrl = computed(() => {
@@ -224,6 +231,11 @@ function isOwnComment(comment) {
   return session.value?.user?.id === comment.author_id
 }
 
+// Puede eliminar el comentario si es propietario o admin
+function canDeleteComment(comment) {
+  return isOwnComment(comment) || isAdmin.value
+}
+
 function startEdit() {
   editing.value = true
   editedContent.value = props.post.content
@@ -236,7 +248,9 @@ function cancelEdit() {
 
 async function saveEdit() {
   try {
-    const updated = await updatePost(props.post.id, { content: editedContent.value })
+    // Usar función admin si es admin y no es propietario
+    const updateFn = (isAdmin.value && !isOwnPost.value) ? adminUpdatePost : updatePost
+    const updated = await updateFn(props.post.id, { content: editedContent.value })
     Object.assign(props.post, updated)
     editing.value = false
     emit('updated', updated)
@@ -261,7 +275,9 @@ function handleDelete() {
           await deletePostImage(props.post.image_path)
         }
 
-        await deletePost(props.post.id)
+        // Usar función admin si es admin y no es propietario
+        const deleteFn = (isAdmin.value && !isOwnPost.value) ? adminDeletePost : deletePost
+        await deleteFn(props.post.id)
         emit('deleted', props.post.id)
         showToast('Post eliminado', 'success')
       } catch (err) {
@@ -335,6 +351,7 @@ function deleteCommentHandler(commentId) {
   if (!comment) return
 
   const preview = comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : '')
+  const isOwnCmt = isOwnComment(comment)
 
   confirmDialogData.value = {
     title: '¿Eliminar este comentario?',
@@ -342,7 +359,9 @@ function deleteCommentHandler(commentId) {
     preview: preview,
     onConfirm: async () => {
       try {
-        await deleteComment(commentId)
+        // Usar función admin si es admin y no es propietario del comentario
+        const deleteFn = (isAdmin.value && !isOwnCmt) ? adminDeleteComment : deleteComment
+        await deleteFn(commentId)
 
         // Eliminar el comentario inmediatamente del array local
         comments.value = comments.value.filter(c => c.id !== commentId)

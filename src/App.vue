@@ -1,13 +1,20 @@
 <template>
-  <component :is="layoutComponent">
-    <RouterView v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </RouterView>
+  <div>
+    <!-- Banner de modo administrador -->
+    <div v-if="isAdmin" class="admin-banner">
+      Modo Administrador
+    </div>
 
-    <Toast :message="toastMessage" :type="toastType" @close="closeToast" />
-  </component>
+    <component :is="layoutComponent">
+      <RouterView v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </RouterView>
+
+      <Toast :message="toastMessage" :type="toastType" @close="closeToast" />
+    </component>
+  </div>
 </template>
 
 <script setup>
@@ -15,9 +22,13 @@ import { computed, ref, provide } from 'vue'
 import { useRoute } from 'vue-router'
 import AppLayout from './layouts/AppLayout.vue'
 import Toast from './components/Toast.vue'
+import { useAdmin } from '@/composables/useAdmin'
 
 const route = useRoute()
 const layoutComponent = computed(() => AppLayout)
+
+// Estado de administrador
+const { isAdmin } = useAdmin()
 
 // Sistema global de notificaciones
 const toastMessage = ref('')

@@ -43,7 +43,13 @@
           </div>
         </div>
 
-        <h2 class="text-xl font-semibold text-white mb-3">Perfil</h2>
+        <div class="flex items-center gap-2 mb-3">
+          <h2 class="text-xl font-semibold text-white">Perfil</h2>
+          <!-- Badge de administrador -->
+          <span v-if="profile?.is_admin" class="admin-badge">
+            Admin
+          </span>
+        </div>
 
         <div v-if="loading" class="text-gray-400 text-sm">Cargando perfil...</div>
         <div v-else-if="!profile" class="text-gray-500 text-sm">

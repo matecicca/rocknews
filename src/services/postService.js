@@ -211,3 +211,51 @@ export function subscribeToPosts(onChange) {
 
   return () => supabase.removeChannel(channel)
 }
+
+// =============================================
+// FUNCIONES DE ADMINISTRACIÓN
+// =============================================
+
+/**
+ * Actualiza una publicación como administrador (puede actualizar cualquier post).
+ * Las RLS en Supabase validan que el usuario sea admin.
+ * @param {string} postId - ID del post a actualizar.
+ * @param {object} updates - Datos a actualizar.
+ * @returns {Promise<object>} Post actualizado con perfil del autor.
+ * @throws {Error} Si ocurre un error en la actualización.
+ */
+export async function adminUpdatePost(postId, updates) {
+  const { data, error } = await supabase
+    .from('posts')
+    .update(updates)
+    .eq('id', postId)
+    .select('id, content, image_path, created_at, author_id')
+    .single()
+
+  if (error) throw error
+
+  // Enriquecer con perfil del autor
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, bio, avatar_path')
+    .eq('id', data.author_id)
+    .single()
+
+  return { ...data, profiles: profile || null }
+}
+
+/**
+ * Elimina una publicación como administrador (puede eliminar cualquier post).
+ * Las RLS en Supabase validan que el usuario sea admin.
+ * @param {string} postId - ID del post a eliminar.
+ * @returns {Promise<void>}
+ * @throws {Error} Si ocurre un error en la eliminación.
+ */
+export async function adminDeletePost(postId) {
+  const { error } = await supabase
+    .from('posts')
+    .delete()
+    .eq('id', postId)
+
+  if (error) throw error
+}
