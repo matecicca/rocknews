@@ -4,8 +4,8 @@
     class="space-y-4 text-white"
   >
     <div>
-      <label for="post-image" class="cursor-pointer text-gray-400 hover:text-white transition">
-        <span class="text-sm">Agregar una imagen</span>
+      <label for="post-image" class="btn btn-primary text-sm cursor-pointer inline-flex items-center justify-center">
+        <span>Agregar una imagen</span>
         <input
           id="post-image"
           type="file"

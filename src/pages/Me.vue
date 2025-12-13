@@ -68,7 +68,7 @@
           </RouterLink>
           <button
             type="button"
-            class="btn btn-primary btn-nowrap"
+            class="btn btn-ghost btn-nowrap"
             @click="logout"
             :disabled="!session"
           >

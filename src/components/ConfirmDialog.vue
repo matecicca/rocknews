@@ -37,14 +37,14 @@
           <button
             type="button"
             @click="cancel"
-            class="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 transition"
+            class="btn btn-admin-cancel px-4 py-2"
           >
             Cancelar
           </button>
           <button
             type="button"
             @click="confirm"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 transition"
+            class="btn btn-ghost px-4 py-2"
           >
             Eliminar
           </button>

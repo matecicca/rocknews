@@ -36,7 +36,7 @@
           <RouterLink
             v-if="isLoggedIn"
             to="/me"
-            class="btn btn-ghost btn-nowrap flex items-center gap-2"
+            class="btn btn-primary btn-nowrap flex items-center gap-2"
           >
             <div class="w-7 h-7 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center flex-shrink-0">
               <img
@@ -64,7 +64,7 @@
             v-else
             type="button"
             @click="logout"
-            class="btn btn-primary btn-nowrap"
+            class="btn btn-ghost btn-nowrap"
           >
             Cerrar sesión
           </button>

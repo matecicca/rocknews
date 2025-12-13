@@ -152,14 +152,16 @@ async function handleSubmit() {
       }
 
       showToast('Cuenta creada con éxito 🎉', 'success')
+      // Después del registro, redirigir a editar perfil
+      router.push('/edit-profile')
     } else {
       const { error } = await signIn(email.value, password.value)
       if (error) throw error
       showToast('Sesión iniciada correctamente 👋', 'success')
+      // Después del login, usar redirect o ir al feed
+      const redirectTo = route.query.redirect || '/feed'
+      router.push(redirectTo)
     }
-
-    const redirectTo = route.query.redirect || '/feed'
-    router.push(redirectTo)
   } catch (err) {
     console.error(err)
     showToast(

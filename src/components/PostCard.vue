@@ -69,11 +69,11 @@
         :disabled="savingEdit"
       ></textarea>
       <div class="flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm" :disabled="savingEdit">
+        <button type="submit" class="btn btn-admin-save btn-sm" :disabled="savingEdit">
           <Loader v-if="savingEdit" size="xs" inline />
           <span v-else>Guardar</span>
         </button>
-        <button type="button" @click="cancelEdit" class="btn btn-ghost btn-sm" :disabled="savingEdit">Cancelar</button>
+        <button type="button" @click="cancelEdit" class="btn btn-admin-cancel btn-sm" :disabled="savingEdit">Cancelar</button>
       </div>
     </form>
     <p v-else class="whitespace-pre-wrap text-gray-200">{{ post.content }}</p>

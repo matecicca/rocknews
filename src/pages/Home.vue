@@ -15,7 +15,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto mt-10">
         <RouterLink
           to="/feed"
-          class="btn btn-primary btn-nowrap text-lg py-3 shadow-lg hover:bg-gray-700 transition"
+          class="btn btn-primary btn-nowrap text-lg py-3 shadow-lg transition"
         >
           Ir al Feed
         </RouterLink>
@@ -23,7 +23,7 @@
         <RouterLink
           v-if="isLoggedIn"
           to="/community"
-          class="btn btn-ghost btn-nowrap text-lg py-3 shadow-lg hover:bg-gray-700 transition"
+          class="btn btn-primary btn-nowrap text-lg py-3 shadow-lg transition"
         >
           Ver Comunidad
         </RouterLink>
@@ -31,7 +31,7 @@
         <RouterLink
           v-else
           to="/auth"
-          class="btn btn-ghost btn-nowrap text-lg py-3 shadow-lg hover:bg-gray-700 transition"
+          class="btn btn-primary btn-nowrap text-lg py-3 shadow-lg transition"
         >
           Ingresar o Registrarse
         </RouterLink>
