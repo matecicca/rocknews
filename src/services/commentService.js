@@ -31,10 +31,10 @@ export async function listComments(postId) {
 
   if (error) {
     console.error('Error listComments:', error)
-    return []
+    throw new Error(`Error al cargar comentarios: ${error.message}`)
   }
 
-  return data
+  return data || []
 }
 
 /**
@@ -123,10 +123,11 @@ export async function getCommentsCount(postId) {
 
   if (error) {
     console.error('Error getCommentsCount:', error)
+    // En este caso retornamos 0 para no romper la UI, pero logueamos el error
     return 0
   }
 
-  return count || 0
+  return count ?? 0
 }
 
 /**

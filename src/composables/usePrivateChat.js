@@ -65,11 +65,21 @@ export function usePrivateChat(otherUserId) {
   }
 
   /**
+   * Detener la suscripción en tiempo real.
+   */
+  function stopRealtime() {
+    if (unsubscribe) {
+      unsubscribe()
+      unsubscribe = null
+    }
+  }
+
+  /**
    * Suscribirse a nuevos mensajes en tiempo real.
    */
   function listenRealtime(convId) {
-    // Evitar duplicar listeners
-    if (unsubscribe) unsubscribe()
+    // Limpiar listener anterior antes de crear uno nuevo
+    stopRealtime()
 
     unsubscribe = subscribeToPrivateMessages(convId, msg => {
       // Evitar mensajes duplicados
@@ -97,8 +107,8 @@ export function usePrivateChat(otherUserId) {
    * Limpiar suscripción al desmontar componente.
    */
   onUnmounted(() => {
-    if (unsubscribe) unsubscribe()
+    stopRealtime()
   })
 
-  return { messages, loading, initChat, sendMessage }
+  return { messages, loading, initChat, sendMessage, stopRealtime }
 }

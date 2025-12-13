@@ -15,6 +15,15 @@
     <Loader v-if="loading" size="md" text="Cargando publicaciones..." />
 
     <div
+      v-else-if="error"
+      class="text-center text-red-400 bg-gray-800 border border-red-700 p-8 rounded-xl max-w-2xl mx-auto"
+    >
+      <p class="text-lg">Error al cargar el feed</p>
+      <p class="text-sm mt-2">{{ error }}</p>
+      <button @click="fetchFirstPage" class="btn btn-primary mt-4">Reintentar</button>
+    </div>
+
+    <div
       v-else-if="posts.length === 0"
       class="text-center text-gray-400 bg-gray-800 border border-gray-700 p-8 rounded-xl max-w-2xl mx-auto"
     >
@@ -41,7 +50,7 @@ import Loader from '@/components/Loader.vue'
 import { useFeed } from '@/composables/useFeed'
 import { useAdmin } from '@/composables/useAdmin'
 
-const { posts, loading, fetchFirstPage, prepend } = useFeed()
+const { posts, loading, error, fetchFirstPage, prepend } = useFeed()
 const { isAdmin } = useAdmin()
 
 function handleDeleted(postId) {

@@ -66,10 +66,14 @@
         v-model="editedContent"
         class="textarea bg-gray-900 border-gray-700 text-white w-full"
         rows="3"
+        :disabled="savingEdit"
       ></textarea>
       <div class="flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
-        <button type="button" @click="cancelEdit" class="btn btn-ghost btn-sm">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-sm" :disabled="savingEdit">
+          <Loader v-if="savingEdit" size="xs" inline />
+          <span v-else>Guardar</span>
+        </button>
+        <button type="button" @click="cancelEdit" class="btn btn-ghost btn-sm" :disabled="savingEdit">Cancelar</button>
       </div>
     </form>
     <p v-else class="whitespace-pre-wrap text-gray-200">{{ post.content }}</p>
@@ -167,6 +171,7 @@ import { updatePost, deletePost, getPostImageUrl, deletePostImage, adminUpdatePo
 import { getAvatarUrl } from '@/services/profileService'
 import { listComments, createComment, deleteComment, getCommentsCount, subscribeToComments, adminDeleteComment } from '@/services/commentService'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import Loader from '@/components/Loader.vue'
 
 const props = defineProps({
   post: { type: Object, required: true }
@@ -180,6 +185,7 @@ const showToast = inject('showToast', () => {})
 
 const editing = ref(false)
 const editedContent = ref('')
+const savingEdit = ref(false)
 const showComments = ref(false)
 const comments = ref([])
 const commentCount = ref(0)
@@ -247,6 +253,9 @@ function cancelEdit() {
 }
 
 async function saveEdit() {
+  if (savingEdit.value) return
+
+  savingEdit.value = true
   try {
     // Usar función admin si es admin y no es propietario
     const updateFn = (isAdmin.value && !isOwnPost.value) ? adminUpdatePost : updatePost
@@ -258,6 +267,8 @@ async function saveEdit() {
   } catch (err) {
     console.error(err)
     showToast('Error al actualizar', 'error')
+  } finally {
+    savingEdit.value = false
   }
 }
 

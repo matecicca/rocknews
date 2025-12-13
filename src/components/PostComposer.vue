@@ -22,8 +22,15 @@
         id="post-content"
         v-model="content"
         class="textarea bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:ring-gray-600 focus:border-gray-600 min-h-[80px]"
+        :class="{ 'border-red-500': errorMessage }"
         placeholder="Escribe lo que quieras..."
+        :maxlength="MAX_CONTENT_LENGTH"
       ></textarea>
+      <div class="flex justify-between items-center mt-1">
+        <p v-if="errorMessage" class="text-red-400 text-xs">{{ errorMessage }}</p>
+        <span v-else></span>
+        <span class="text-xs text-gray-500">{{ content.length }}/{{ MAX_CONTENT_LENGTH }}</span>
+      </div>
     </div>
 
     <div v-if="imagePreview" class="relative">
@@ -66,6 +73,9 @@ const content = ref('')
 const submitting = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref(null)
+const errorMessage = ref('')
+
+const MAX_CONTENT_LENGTH = 2000
 
 const displayName = computed(() => {
   const user = session.value?.user
@@ -87,11 +97,35 @@ function removeImage() {
   imagePreview.value = null
 }
 
+/**
+ * Valida el contenido del post
+ * @returns {boolean} true si es válido
+ */
+function validateContent() {
+  errorMessage.value = ''
+
+  if (!content.value.trim()) {
+    errorMessage.value = 'El contenido no puede estar vacío'
+    return false
+  }
+
+  if (content.value.length > MAX_CONTENT_LENGTH) {
+    errorMessage.value = `El contenido no puede exceder ${MAX_CONTENT_LENGTH} caracteres`
+    return false
+  }
+
+  return true
+}
+
 async function submit() {
-  if (!content.value.trim()) return
+  if (!validateContent()) {
+    showToast(errorMessage.value, 'error')
+    return
+  }
 
   try {
     submitting.value = true
+    errorMessage.value = ''
 
     let imagePath = null
     if (imageFile.value) {
@@ -99,7 +133,7 @@ async function submit() {
       imagePath = await uploadPostImage(imageFile.value, userId)
     }
 
-    const post = await createPost({ content: content.value, image_path: imagePath })
+    const post = await createPost({ content: content.value.trim(), image_path: imagePath })
 
     content.value = ''
     removeImage()

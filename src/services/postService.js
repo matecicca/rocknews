@@ -33,10 +33,10 @@ export async function listFeed({ limit = 20 } = {}) {
 
   if (error) {
     console.error('Error listFeed:', error)
-    return []
+    throw new Error(`Error al cargar el feed: ${error.message}`)
   }
 
-  return data
+  return data || []
 }
 
 /**
@@ -96,10 +96,10 @@ export async function listUserPosts(userId) {
 
   if (error) {
     console.error('Error listUserPosts:', error)
-    return []
+    throw new Error(`Error al cargar publicaciones del usuario: ${error.message}`)
   }
 
-  return data
+  return data || []
 }
 
 /**

@@ -104,12 +104,28 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 
+/**
+ * Valida el formato de email
+ */
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
 function validateForm() {
   if (!email.value) {
     showToast('El correo electrónico es obligatorio.', 'error')
     return false
   }
-  if (!password.value || password.value.length < 6) {
+  if (!isValidEmail(email.value)) {
+    showToast('El formato del correo electrónico no es válido.', 'error')
+    return false
+  }
+  if (!password.value) {
+    showToast('La contraseña es obligatoria.', 'error')
+    return false
+  }
+  if (password.value.length < 6) {
     showToast('La contraseña debe tener al menos 6 caracteres.', 'error')
     return false
   }

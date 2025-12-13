@@ -64,9 +64,11 @@
           <button
             type="button"
             @click="handlePrivateMessage"
+            :disabled="loadingMessage"
             class="w-full btn btn-primary text-sm py-2 px-4 mt-2 transition hover:bg-gray-700"
           >
-            Enviar mensaje privado
+            <Loader v-if="loadingMessage" size="xs" inline />
+            <span v-else>Enviar mensaje privado</span>
           </button>
         </div>
       </div>
@@ -82,6 +84,7 @@ import { getProfile, getAvatarUrl } from '@/services/profileService'
 import { listUserPosts } from '@/services/postService'
 import { getOrCreateConversation } from '@/services/privateChatService'
 import PostCard from '@/components/PostCard.vue'
+import Loader from '@/components/Loader.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -90,6 +93,7 @@ const { getSession, session } = useAuth()
 const profile = ref(null)
 const loading = ref(true)
 const loadingPosts = ref(true)
+const loadingMessage = ref(false)
 const userPosts = ref([])
 
 const avatarUrl = computed(() => getAvatarUrl(profile.value?.avatar_path))
@@ -115,6 +119,9 @@ onMounted(async () => {
  * Crear conversación y redirigir al chat privado
  */
 async function handlePrivateMessage() {
+  if (loadingMessage.value) return
+
+  loadingMessage.value = true
   try {
     const userSession = await getSession()
     if (!userSession?.user?.id) {
@@ -126,12 +133,14 @@ async function handlePrivateMessage() {
     const otherUserId = profile.value.id
 
     // Crear o recuperar conversación
-    const conversation = await getOrCreateConversation(currentUserId, otherUserId)
+    await getOrCreateConversation(currentUserId, otherUserId)
 
     // Redirigir a la vista de mensajes
     router.push(`/messages/${otherUserId}`)
   } catch (error) {
     console.error('Error iniciando chat privado:', error)
+  } finally {
+    loadingMessage.value = false
   }
 }
 </script>
