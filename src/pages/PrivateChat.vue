@@ -20,7 +20,10 @@
                 ? 'bg-gray-700 text-white'
                 : 'bg-gray-900 text-gray-300'"
             >
-              {{ msg.content }}
+              <p class="m-0">{{ msg.content }}</p>
+              <span class="text-xs text-gray-500 block text-right mt-1">
+                {{ formatMessageTime(msg.created_at) }}
+              </span>
             </div>
           </div>
         </div>
@@ -61,7 +64,18 @@
   const newMessage = ref('')
   const otherUserName = ref('')
   const { messages, loading, initChat, sendMessage } = usePrivateChat(otherUserId)
-  
+
+  /**
+   * Formatea la hora de un mensaje para mostrarla de forma amigable.
+   * @param {string} dateStr - Fecha en formato ISO.
+   * @returns {string} Hora formateada (HH:MM).
+   */
+  function formatMessageTime(dateStr) {
+    if (!dateStr) return ''
+    const date = new Date(dateStr)
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+
   // Función para enviar mensaje
   async function handleSend() {
     if (!newMessage.value.trim()) return

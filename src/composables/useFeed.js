@@ -10,6 +10,8 @@ const posts = ref([])
 const loading = ref(false)
 const loadingMore = ref(false)
 const error = ref(null)
+// false = más nuevas primero (descendente), true = más antiguas primero (ascendente)
+const sortAscending = ref(false)
 let unsubscribe = null
 
 /**
@@ -18,9 +20,10 @@ let unsubscribe = null
  * @property {import('vue').Ref<object[]>} posts - Lista reactiva de publicaciones.
  * @property {import('vue').Ref<boolean>} loading - Estado de carga inicial.
  * @property {import('vue').Ref<boolean>} loadingMore - Estado de carga adicional (paginación).
+ * @property {import('vue').Ref<boolean>} sortAscending - Dirección del orden (false = más nuevas primero).
  * @property {Function} fetchFirstPage - Carga los primeros posts y activa la subscripción realtime.
  * @property {Function} fetchNextPage - Carga publicaciones adicionales.
- * @property {Function} prepend - Inserta un nuevo post al inicio del feed.
+ * @property {Function} toggleSortOrder - Cambia el orden de las publicaciones.
  * @property {Function} stopRealtime - Detiene la subscripción en tiempo real.
  */
 export function useFeed() {
@@ -32,7 +35,7 @@ export function useFeed() {
     loading.value = true
     error.value = null
     try {
-      posts.value = await listFeed({ limit: 20 })
+      posts.value = await listFeed({ limit: 20, ascending: sortAscending.value })
       // Iniciar subscripción realtime solo una vez
       if (!unsubscribe) unsubscribe = subscribeToPosts(handleRealtime)
     } catch (err) {
@@ -51,7 +54,7 @@ export function useFeed() {
   async function fetchNextPage() {
     loadingMore.value = true
     try {
-      const more = await listFeed({ limit: 20 })
+      const more = await listFeed({ limit: 20, ascending: sortAscending.value })
       posts.value = [...posts.value, ...more]
     } catch (err) {
       console.error('Error cargando más posts:', err)
@@ -62,11 +65,26 @@ export function useFeed() {
   }
 
   /**
-   * Inserta una nueva publicación al inicio del feed.
-   * @param {object} post - Objeto de la publicación.
+   * Cambia el orden de las publicaciones y recarga el feed.
+   * @returns {Promise<void>}
    */
-  function prepend(post) {
-    posts.value.unshift(post)
+  async function toggleSortOrder() {
+    sortAscending.value = !sortAscending.value
+    await fetchFirstPage()
+  }
+
+  /**
+   * Inserta un post en la posición correcta según el orden actual.
+   * @param {object} post - Publicación a insertar.
+   */
+  function insertPostInOrder(post) {
+    if (sortAscending.value) {
+      // Orden ascendente: más antiguas primero, nuevas al final
+      posts.value.push(post)
+    } else {
+      // Orden descendente: más nuevas primero, nuevas al inicio
+      posts.value.unshift(post)
+    }
   }
 
   /**
@@ -78,7 +96,7 @@ export function useFeed() {
     if (eventType === 'INSERT') {
       // Solo agregar si no existe ya (evita duplicados cuando se crea localmente)
       if (!posts.value.find(p => p.id === post.id)) {
-        prepend(post)
+        insertPostInOrder(post)
       }
     }
     if (eventType === 'UPDATE') {
@@ -106,5 +124,5 @@ export function useFeed() {
     stopRealtime()
   })
 
-  return { posts, loading, loadingMore, error, fetchFirstPage, fetchNextPage, prepend, stopRealtime }
+  return { posts, loading, loadingMore, error, sortAscending, fetchFirstPage, fetchNextPage, toggleSortOrder, stopRealtime }
 }

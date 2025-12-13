@@ -9,9 +9,10 @@ import { supabase } from './supabaseClient'
  * Obtiene los posts más recientes con información del autor.
  * @param {object} [options] - Parámetros opcionales.
  * @param {number} [options.limit=20] - Número máximo de publicaciones a devolver.
+ * @param {boolean} [options.ascending=false] - Si es true, ordena de más antiguas a más nuevas.
  * @returns {Promise<object[]>} Lista de publicaciones.
  */
-export async function listFeed({ limit = 20 } = {}) {
+export async function listFeed({ limit = 20, ascending = false } = {}) {
   const { data, error } = await supabase
     .from('posts')
     .select(`
@@ -28,7 +29,7 @@ export async function listFeed({ limit = 20 } = {}) {
         avatar_path
       )
     `)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending })
     .limit(limit)
 
   if (error) {
@@ -194,6 +195,7 @@ export async function deletePostImage(path) {
 
 /**
  * Escucha cambios en tiempo real en la tabla `posts`.
+ * Para eventos INSERT y UPDATE, enriquece el post con la información del autor.
  * @param {Function} onChange - Callback ejecutado ante inserciones, actualizaciones o eliminaciones.
  * @returns {Function} Función para cancelar la suscripción.
  */
@@ -203,8 +205,31 @@ export function subscribeToPosts(onChange) {
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'posts' },
-      (payload) => {
-        onChange(payload.new ?? payload.old, payload.eventType)
+      async (payload) => {
+        const eventType = payload.eventType
+
+        if (eventType === 'DELETE') {
+          // Para DELETE, solo necesitamos el id para eliminarlo del array
+          onChange(payload.old, eventType)
+          return
+        }
+
+        // Para INSERT y UPDATE, enriquecer con perfil del autor
+        const post = payload.new
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, username, full_name, bio, avatar_path')
+            .eq('id', post.author_id)
+            .single()
+
+          const enrichedPost = { ...post, profiles: profile || null }
+          onChange(enrichedPost, eventType)
+        } catch (err) {
+          console.error('Error enriqueciendo post realtime:', err)
+          // En caso de error, enviar el post sin enriquecer
+          onChange({ ...post, profiles: null }, eventType)
+        }
       }
     )
     .subscribe()

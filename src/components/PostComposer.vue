@@ -44,11 +44,7 @@
       </button>
     </div>
 
-    <div class="flex items-center justify-between">
-      <div class="text-xs text-gray-400">
-        Como: <strong class="text-gray-200">{{ displayName }}</strong>
-      </div>
-
+    <div class="flex items-center justify-end">
       <button
         class="btn btn-primary btn-nowrap"
         :disabled="submitting || !content.trim()"
@@ -61,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
+import { ref, inject } from 'vue'
 import { createPost, uploadPostImage } from '@/services/postService'
 import { useAuth } from '@/composables/useAuth'
 import Loader from '@/components/Loader.vue'
@@ -76,11 +72,6 @@ const imagePreview = ref(null)
 const errorMessage = ref('')
 
 const MAX_CONTENT_LENGTH = 2000
-
-const displayName = computed(() => {
-  const user = session.value?.user
-  return user?.user_metadata?.username || user?.email || 'Anónimo'
-})
 
 const emit = defineEmits(['created'])
 

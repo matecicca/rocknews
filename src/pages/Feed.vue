@@ -1,15 +1,32 @@
 <template>
   <section class="max-w-7xl mx-auto px-4 py-10 text-white space-y-6">
-    <!-- Ocultar PostComposer para administradores -->
-    <div v-if="!isAdmin" class="bg-gray-800 rounded-xl shadow-md p-4 border border-gray-700">
+    <!-- PostComposer solo para usuarios autenticados que no sean admin -->
+    <div v-if="canPost" class="bg-gray-800 rounded-xl shadow-md p-4 border border-gray-700">
       <h3 class="text-lg font-semibold text-white mb-3">
         ¿Qué estás pensando?
       </h3>
 
       <PostComposer
-        @created="prepend"
         class="flex flex-col gap-4"
       />
+    </div>
+
+    <!-- Mensaje para usuarios no autenticados -->
+    <div v-else-if="!isLoggedIn" class="bg-gray-800 rounded-xl shadow-md p-4 border border-gray-700 text-center">
+      <p class="text-gray-400">Para publicar, inicia sesión.</p>
+    </div>
+
+    <!-- Control de orden de publicaciones -->
+    <div class="flex items-center justify-end">
+      <button
+        type="button"
+        @click="toggleSortOrder"
+        class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-800"
+        :title="sortAscending ? 'Ordenar por más nuevas primero' : 'Ordenar por más antiguas primero'"
+      >
+        <span>{{ sortAscending ? '↑' : '↓' }}</span>
+        <span class="hidden sm:inline">{{ sortAscending ? 'Más antiguas primero' : 'Más nuevas primero' }}</span>
+      </button>
     </div>
 
     <Loader v-if="loading" size="md" text="Cargando publicaciones..." />
@@ -43,15 +60,20 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import PostCard from '@/components/PostCard.vue'
 import PostComposer from '@/components/PostComposer.vue'
 import Loader from '@/components/Loader.vue'
 import { useFeed } from '@/composables/useFeed'
 import { useAdmin } from '@/composables/useAdmin'
+import { useAuth } from '@/composables/useAuth'
 
-const { posts, loading, error, fetchFirstPage, prepend } = useFeed()
+const { posts, loading, error, sortAscending, fetchFirstPage, toggleSortOrder } = useFeed()
 const { isAdmin } = useAdmin()
+const { session } = useAuth()
+
+const isLoggedIn = computed(() => !!session.value)
+const canPost = computed(() => isLoggedIn.value && !isAdmin.value)
 
 function handleDeleted(postId) {
   const index = posts.value.findIndex(p => p.id === postId)

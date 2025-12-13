@@ -1,6 +1,6 @@
 <template>
   <article
-    class="p-4 rounded-lg border border-gray-700/40 bg-gray-800/50 transition hover:border-gray-500/60 space-y-3"
+    class="p-4 rounded-lg border border-gray-700/40 transition hover:border-gray-500/60 space-y-3"
   >
     <header class="flex items-start justify-between">
       <div class="flex items-center gap-3">

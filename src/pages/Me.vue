@@ -59,9 +59,6 @@
         </div>
 
         <div class="mt-5 flex flex-wrap gap-2">
-          <button type="button" class="btn btn-ghost btn-nowrap" @click="refreshProfile">
-            Refrescar
-          </button>
           <RouterLink
             to="/edit-profile"
             class="btn btn-primary btn-nowrap"
@@ -133,11 +130,6 @@ async function loadUserPosts() {
   } finally {
     loadingPosts.value = false
   }
-}
-
-async function refreshProfile() {
-  await loadProfile()
-  await loadUserPosts()
 }
 
 async function logout() {
