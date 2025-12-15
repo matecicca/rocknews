@@ -75,18 +75,32 @@
 <script setup>
 import { ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import { useProfiles } from '@/composables/useProfiles'
 import { useAuth } from '@/composables/useAuth'
 import { useAdmin } from '@/composables/useAdmin'
-import { getAvatarUrl, adminDeleteProfile } from '@/services/profileService'
+import { getAvatarUrl, adminDeleteProfile, listProfiles } from '@/services/profileService'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import Loader from '@/components/Loader.vue'
 
-const { profiles, loading, fetchProfiles } = useProfiles()
 const { session } = useAuth()
 const { isAdmin } = useAdmin()
 const router = useRouter()
 const showToast = inject('showToast', () => {})
+
+// Estado de perfiles
+const profiles = ref([])
+const loading = ref(false)
+
+/**
+ * Carga los perfiles públicos.
+ * @param {object} [options] - Opciones de búsqueda.
+ * @param {number} [options.limit=50] - Cantidad máxima de perfiles a obtener.
+ * @returns {Promise<void>}
+ */
+async function fetchProfiles({ limit = 50 } = {}) {
+  loading.value = true
+  profiles.value = await listProfiles({ limit })
+  loading.value = false
+}
 
 // Estados del modal de confirmación
 const confirmDialogOpen = ref(false)

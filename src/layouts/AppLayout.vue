@@ -103,7 +103,7 @@ const { session, signOut } = useAuth()
 const isLoggedIn = computed(() => !!session.value)
 const isAuth = computed(() => route.name === 'Auth')
 
-// Current user profile data for header
+// Datos del perfil del usuario actual para el encabezado
 const currentProfile = ref(null)
 
 const currentAvatarUrl = computed(() => getAvatarUrl(currentProfile.value?.avatar_path))
@@ -127,12 +127,12 @@ async function loadCurrentProfile() {
   try {
     currentProfile.value = await getProfile(userId)
   } catch (e) {
-    console.error('Error loading current profile:', e)
+    console.error('Error al cargar el perfil actual:', e)
     currentProfile.value = null
   }
 }
 
-// Watch for session changes to load profile
+// Observar cambios en la sesión para cargar el perfil
 watch(() => session.value?.user?.id, (newId) => {
   if (newId) {
     loadCurrentProfile()
@@ -141,13 +141,13 @@ watch(() => session.value?.user?.id, (newId) => {
   }
 }, { immediate: true })
 
-// Also check on mount and when visibility changes (in case profile was updated)
+// También verificar al montar y cuando cambia la visibilidad (en caso de que el perfil se haya actualizado)
 onMounted(() => {
   if (session.value?.user?.id) {
     loadCurrentProfile()
   }
 
-  // Listen for profile updates
+  // Escuchar actualizaciones del perfil
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && session.value?.user?.id) {
       const updated = localStorage.getItem('profileUpdated')
@@ -162,6 +162,6 @@ onMounted(() => {
 async function logout() {
   await signOut()
   currentProfile.value = null
-  router.push('/auth')
+  router.push('/')
 }
 </script>

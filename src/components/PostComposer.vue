@@ -73,8 +73,6 @@ const errorMessage = ref('')
 
 const MAX_CONTENT_LENGTH = 2000
 
-const emit = defineEmits(['created'])
-
 function handleImageChange(event) {
   const file = event.target.files?.[0]
   if (file) {
@@ -128,7 +126,6 @@ async function submit() {
 
     content.value = ''
     removeImage()
-    emit('created', post)
     showToast('¡Publicado!', 'success')
   } catch (err) {
     console.error(err)
