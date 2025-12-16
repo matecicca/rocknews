@@ -7,4 +7,7 @@ Comisión: DWM4AP
 Apellido y nombre: Ciccarello Mateo, Castelino Felix
 Docente: Santiago Gallino
 Carácter de entrega: Segundo Parcial
-Credenciales Admin: admin@admin.com / adminpass123
+
+Credenciales administrador:
+Email: [admin@admin.com]
+Password: [adminpass123]
